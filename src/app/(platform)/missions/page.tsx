@@ -2,152 +2,100 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Target, Trophy, Zap, Clock, Users, CheckCircle, ChevronRight, Filter } from "lucide-react";
+import { Target, Clock, Zap, Users, Check, ArrowRight, Filter } from "lucide-react";
+import Link from "next/link";
 
 const MISSIONS = [
-  {
-    id: "1", title: "Summarize a Longevity Paper", category: "Longevity", difficulty: "easy",
-    description: "Find a recent longevity research paper published in 2024–2025 and write a clear 3-paragraph plain-language summary, suitable for a non-specialist audience.",
-    rep_reward: 50, badge_reward: null, participants: 142, deadline: "72h left", status: "available",
-  },
-  {
-    id: "2", title: "Validate an AI-Generated Summary", category: "AI", difficulty: "medium",
-    description: "Review one AI-generated research summary posted in the feed. Fact-check all claims against primary sources and submit a structured accuracy report.",
-    rep_reward: 120, badge_reward: "AI Analyst", participants: 38, deadline: "5d left", status: "available",
-  },
-  {
-    id: "3", title: "Organize a DeSci Dataset", category: "DeSci", difficulty: "medium",
-    description: "Help categorize and tag a shared scientific dataset. Add missing metadata fields, improve tag accuracy, and enhance discoverability for the research community.",
-    rep_reward: 100, badge_reward: null, participants: 27, deadline: "3d left", status: "available",
-  },
-  {
-    id: "4", title: "Write a Scientific Hypothesis Thread", category: "Biotech", difficulty: "hard",
-    description: "Post a well-structured scientific hypothesis with supporting evidence from at least 3 peer-reviewed sources. Thread must receive 5+ community upvotes to qualify.",
-    rep_reward: 200, badge_reward: "Research Contributor", participants: 15, deadline: "7d left", status: "available",
-  },
-  {
-    id: "5", title: "Peer Review a Hypothesis", category: "Genetics", difficulty: "medium",
-    description: "Provide substantive peer review on an open hypothesis thread. Your review must address methodology, evidence quality, and alternative explanations.",
-    rep_reward: 80, badge_reward: "Reviewer", participants: 61, deadline: "4d left", status: "available",
-  },
-  {
-    id: "6", title: "Improve Neuroscience Post Tagging", category: "Neuroscience", difficulty: "easy",
-    description: "Review 10 neuroscience posts and add missing or incorrect tags. Improve discoverability and help maintain research taxonomy quality.",
-    rep_reward: 40, badge_reward: null, participants: 88, deadline: "Ongoing", status: "available",
-  },
+  { id: "1", title: "Summarise a Longevity Paper", desc: "Find a peer-reviewed longevity paper published in 2023–24 and write a structured LABVEX summary with methodology, findings, and limitations.", reward: 50, diff: "Easy", category: "Research", time: "~30 min", completions: 312, icon: "📄" },
+  { id: "2", title: "Validate an AI Protein Prediction", desc: "Take an AlphaFold2 prediction from the community feed and compare it against available wet-lab data. Submit your validation report.", reward: 120, diff: "Medium", category: "Validation", time: "~2h", completions: 89, icon: "🧬" },
+  { id: "3", title: "Peer Review a DeSci Proposal", desc: "Review a community research proposal using LABVEX's structured peer review framework. Score methodology, feasibility, and impact.", reward: 180, diff: "Medium", category: "Peer Review", time: "~3h", completions: 54, icon: "🔬" },
+  { id: "4", title: "Build a VEXY Research Thread", desc: "Create an in-depth research thread using VEXY AI to explore a frontier science topic. Minimum 5 connected posts with citations.", reward: 300, diff: "Hard", category: "Research", time: "~5h", completions: 21, icon: "🧠" },
+  { id: "5", title: "Onboard a Researcher", desc: "Invite and onboard a practicing scientist to LABVEX. Help them complete their profile and post their first research thread.", reward: 75, diff: "Easy", category: "Community", time: "~1h", completions: 445, icon: "👥" },
+  { id: "6", title: "Reproduce a Published Study", desc: "Select a recent study and attempt computational reproduction using available datasets. Document your process and findings.", reward: 500, diff: "Expert", category: "Validation", time: "~20h", completions: 8, icon: "⚗️" },
 ];
 
-const DIFF_COLOR: Record<string, string> = {
-  easy: "#5ccb5f", medium: "#f59e0b", hard: "#f87171",
+const DIFF_COLORS: Record<string, { bg: string; text: string; border: string }> = {
+  Easy: { bg: "rgba(34,197,94,0.08)", text: "#16a34a", border: "rgba(34,197,94,0.2)" },
+  Medium: { bg: "rgba(245,158,11,0.08)", text: "#d97706", border: "rgba(245,158,11,0.2)" },
+  Hard: { bg: "rgba(239,68,68,0.08)", text: "#dc2626", border: "rgba(239,68,68,0.2)" },
+  Expert: { bg: "rgba(139,92,246,0.08)", text: "#7c3aed", border: "rgba(139,92,246,0.2)" },
 };
-const DIFF_BG: Record<string, string> = {
-  easy: "rgba(92,203,95,0.1)", medium: "rgba(245,158,11,0.1)", hard: "rgba(248,113,113,0.1)",
-};
+
+const CATS = ["All", "Research", "Validation", "Peer Review", "Community"];
 
 export default function MissionsPage() {
-  const [filter, setFilter] = useState("All");
-  const [joined, setJoined] = useState<string[]>([]);
+  const [cat, setCat] = useState("All");
+  const [completed, setCompleted] = useState<string[]>([]);
 
-  const categories = ["All", "AI", "Biotech", "Longevity", "Neuroscience", "Genetics", "DeSci"];
-  const filtered = filter === "All" ? MISSIONS : MISSIONS.filter((m) => m.category === filter);
+  const filtered = cat === "All" ? MISSIONS : MISSIONS.filter(m => m.category === cat);
 
   return (
-    <div className="container-platform py-8">
+    <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>
       {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-        <div className="badge badge-green mb-4"><Target size={11} />Community Missions</div>
-        <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>
-          Scientific Missions
-        </h1>
-        <p className="text-[var(--text-secondary)] text-[15px] max-w-xl">
-          Complete peer-reviewed scientific tasks, earn reputation points, and unlock badges. Your contributions directly improve the LABVEX research ecosystem.
-        </p>
-      </motion.div>
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 22, color: "var(--ink)", letterSpacing: "-0.02em", marginBottom: 4 }}>Community Missions</h1>
+        <p style={{ fontSize: 13.5, color: "var(--muted)" }}>Complete missions to earn reputation and contribute to the scientific ecosystem.</p>
+      </div>
 
-      {/* Stats row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        {[
-          { icon: Target, label: "Active Missions", value: "6", color: "#5ccb5f" },
-          { icon: Users, label: "Participants", value: "371", color: "#60a5fa" },
-          { icon: Trophy, label: "Badges Available", value: "4", color: "#a78bfa" },
-          { icon: Zap, label: "Max Reward", value: "200 rep", color: "#f59e0b" },
-        ].map((s) => {
+      {/* Stats bar */}
+      <div style={{ display: "flex", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
+        {[{ label: "Available", value: MISSIONS.length, icon: Target, color: "var(--green-3)" }, { label: "Completed today", value: 929, icon: Check, color: "#2563eb" }, { label: "Active scientists", value: "2,400+", icon: Users, color: "#7c3aed" }, { label: "Rep distributed", value: "48K+", icon: Zap, color: "#d97706" }].map(s => {
           const Icon = s.icon;
           return (
-            <div key={s.label} className="glass-card p-4 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: `${s.color}14`, border: `1px solid ${s.color}28` }}>
-                <Icon size={16} style={{ color: s.color }} />
-              </div>
+            <div key={s.label} style={{ flex: 1, minWidth: 140, background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 12, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+              <Icon size={18} style={{ color: s.color, flexShrink: 0 }} />
               <div>
-                <p className="text-[18px] font-bold" style={{ fontFamily: "var(--font-display)" }}>{s.value}</p>
-                <p className="text-[12px] text-[var(--text-muted)]">{s.label}</p>
+                <div style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 18, color: "var(--ink)", letterSpacing: "-0.02em" }}>{s.value}</div>
+                <div style={{ fontSize: 11.5, color: "var(--muted)" }}>{s.label}</div>
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Filters */}
-      <div className="flex gap-1.5 flex-wrap mb-6">
-        {categories.map((c) => (
-          <button key={c} onClick={() => setFilter(c)} className={`badge cursor-pointer transition-all ${filter === c ? "badge-green" : "badge-muted"}`}>{c}</button>
+      {/* Category filter */}
+      <div style={{ display: "flex", gap: 6, marginBottom: 20, flexWrap: "wrap" }}>
+        {CATS.map(c => (
+          <button key={c} onClick={() => setCat(c)} className={cat === c ? "badge badge-green" : "badge badge-gray"} style={{ cursor: "pointer", fontSize: 13, padding: "6px 14px", transition: "all 0.15s" }}>{c}</button>
         ))}
       </div>
 
-      {/* Mission grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map((mission, i) => {
-          const isJoined = joined.includes(mission.id);
+      {/* Mission cards */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: 14 }}>
+        {filtered.map((m, i) => {
+          const done = completed.includes(m.id);
+          const d = DIFF_COLORS[m.diff];
           return (
-            <motion.div
-              key={mission.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.06 }}
-              className="glass-card p-5 flex flex-col"
-            >
-              {/* Top */}
-              <div className="flex items-start justify-between mb-3">
-                <span className="badge badge-muted text-[11px]">{mission.category}</span>
-                <span
-                  className="badge text-[11px] font-semibold"
-                  style={{ background: DIFF_BG[mission.difficulty], color: DIFF_COLOR[mission.difficulty], border: `1px solid ${DIFF_COLOR[mission.difficulty]}28` }}
-                >
-                  {mission.difficulty.charAt(0).toUpperCase() + mission.difficulty.slice(1)}
-                </span>
+            <motion.div key={m.id} className="card" style={{ padding: "22px 22px" }}
+              initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05, duration: 0.4 }}>
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 12 }}>
+                <div style={{ fontSize: 28, lineHeight: 1 }}>{m.icon}</div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 9px", borderRadius: 99, background: d.bg, color: d.text, border: `1px solid ${d.border}` }}>{m.diff}</span>
+                  <span className="badge badge-gray" style={{ fontSize: 11 }}>{m.category}</span>
+                </div>
               </div>
 
-              <h3 className="text-[15px] font-semibold mb-2 leading-snug" style={{ fontFamily: "var(--font-display)" }}>
-                {mission.title}
-              </h3>
-              <p className="text-[13px] text-[var(--text-secondary)] leading-relaxed flex-1 mb-4">{mission.description}</p>
+              <h3 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 15, color: "var(--ink)", marginBottom: 8, lineHeight: 1.4, letterSpacing: "-0.01em" }}>{m.title}</h3>
+              <p style={{ fontSize: 13, color: "var(--muted)", lineHeight: 1.65, marginBottom: 16 }}>{m.desc}</p>
 
-              {/* Meta */}
-              <div className="flex items-center gap-3 mb-4 text-[12px] text-[var(--text-muted)]">
-                <span className="flex items-center gap-1"><Users size={11} />{mission.participants} joined</span>
-                <span className="flex items-center gap-1"><Clock size={11} />{mission.deadline}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16, paddingTop: 12, borderTop: "1px solid var(--border)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12.5, color: "var(--muted)" }}>
+                  <Clock size={12} />{m.time}
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12.5, color: "var(--muted)" }}>
+                  <Users size={12} />{m.completions} done
+                </div>
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
+                  <Zap size={12} style={{ color: "var(--green-3)" }} />
+                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--green-3)" }}>+{m.reward}</span>
+                  <span style={{ fontSize: 11.5, color: "var(--muted)" }}>rep</span>
+                </div>
               </div>
 
-              {/* Rewards */}
-              <div className="flex items-center gap-2 mb-4">
-                <span className="badge badge-green text-[12px] font-semibold">+{mission.rep_reward} rep</span>
-                {mission.badge_reward && (
-                  <span className="badge badge-purple text-[12px]">
-                    <Trophy size={9} />{mission.badge_reward}
-                  </span>
-                )}
-              </div>
-
-              {/* CTA */}
-              <button
-                onClick={() => setJoined((prev) => isJoined ? prev.filter((id) => id !== mission.id) : [...prev, mission.id])}
-                className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
-                  isJoined
-                    ? "bg-[rgba(92,203,95,0.1)] text-[var(--green-neon)] border border-[rgba(92,203,95,0.3)]"
-                    : "btn-primary"
-                }`}
-              >
-                {isJoined ? <><CheckCircle size={14} />Joined</> : <>Accept Mission<ChevronRight size={14} /></>}
+              <button onClick={() => setCompleted(p => done ? p.filter(x => x !== m.id) : [...p, m.id])}
+                className={done ? "btn btn-outline" : "btn btn-dark"} style={{ width: "100%", justifyContent: "center", fontSize: 13.5, padding: "0.55rem 1rem", transition: "all 0.2s" }}>
+                {done ? <><Check size={14} />Completed</> : <>Start Mission <ArrowRight size={14} /></>}
               </button>
             </motion.div>
           );

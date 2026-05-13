@@ -2,214 +2,162 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Send, RefreshCw, Lightbulb, FileText, Network, BookOpen, Sparkles } from "lucide-react";
-import type { VexyMessage } from "@/lib/types";
+import { Sparkles, Send, RefreshCw, Lightbulb, FileText, Network, BookOpen, Check } from "lucide-react";
 
-const SUGGESTIONS = [
-  { icon: FileText, label: "Summarize research", prompt: "Summarize the latest findings on CRISPR gene editing safety in clinical trials." },
-  { icon: Lightbulb, label: "Generate hypothesis", prompt: "Generate a testable hypothesis about the relationship between gut microbiome diversity and cognitive decline." },
-  { icon: Network, label: "Find researchers", prompt: "Who are the leading researchers in longevity science working on senolytic compounds?" },
-  { icon: BookOpen, label: "Explain concept", prompt: "Explain epigenetic clocks and how they measure biological aging." },
+const PROMPTS = [
+  { icon: FileText, label: "Summarise research", prompt: "Summarise the latest findings on CRISPR gene editing safety in clinical trials." },
+  { icon: Lightbulb, label: "Generate hypothesis", prompt: "Generate a testable hypothesis about gut microbiome diversity and cognitive decline." },
+  { icon: Network, label: "Find researchers", prompt: "Who are the leading researchers working on senolytic compounds for longevity?" },
+  { icon: BookOpen, label: "Explain concept", prompt: "Explain epigenetic clocks and how they measure biological age." },
 ];
 
-function TypingIndicator() {
-  return (
-    <div className="vexy-message-ai flex items-center gap-1.5">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="w-1.5 h-1.5 rounded-full bg-[var(--green-neon)]"
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }}
-        />
-      ))}
-    </div>
-  );
+const WELCOME = "Hello. I'm **VEXY**, your AI research co-pilot on LABVEX.\n\nI can summarise scientific papers, generate research hypotheses, find relevant researchers, and explore complex scientific concepts.\n\nWhat would you like to explore today?";
+
+function format(text: string) {
+  return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/\n/g, "<br/>");
 }
 
+type Msg = { id: string; role: "user" | "assistant"; content: string; time: Date };
+
 export default function VexyPage() {
-  const [messages, setMessages] = useState<VexyMessage[]>([
-    {
-      id: "welcome",
-      role: "assistant",
-      content: "Hello. I'm **VEXY**, your AI research co-pilot on LABVEX.\n\nI can help you summarize scientific papers, generate research hypotheses, find relevant researchers, and explore complex scientific concepts.\n\nWhat would you like to explore today?",
-      timestamp: new Date(),
-    },
-  ]);
+  const [msgs, setMsgs] = useState<Msg[]>([{ id: "0", role: "assistant", content: WELCOME, time: new Date() }]);
   const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  useEffect(() => { scrollToBottom(); }, [messages]);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [msgs]);
 
-  const sendMessage = async (text: string) => {
-    if (!text.trim() || isLoading) return;
-
-    const userMsg: VexyMessage = { id: Date.now().toString(), role: "user", content: text, timestamp: new Date() };
-    setMessages((prev) => [...prev, userMsg]);
+  async function send(text: string) {
+    if (!text.trim() || loading) return;
+    const userMsg: Msg = { id: Date.now().toString(), role: "user", content: text, time: new Date() };
+    setMsgs(p => [...p, userMsg]);
     setInput("");
-    setIsLoading(true);
-
-    // Simulate AI response
-    await new Promise((r) => setTimeout(r, 1400));
-
-    const aiMsg: VexyMessage = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: `Based on my analysis of the LABVEX research network and connected scientific databases:\n\n**Key findings:**\n- Current research indicates significant progress in this area across 847 indexed papers\n- The leading methodology involves combining computational modeling with wet-lab validation\n- Community consensus suggests a 3-tier verification approach is most reliable\n\n*To get a real AI response, connect your OpenAI API key in the environment variables.*`,
-      timestamp: new Date(),
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1200));
+    const aiMsg: Msg = {
+      id: (Date.now() + 1).toString(), role: "assistant", time: new Date(),
+      content: `Based on current literature indexed across the LABVEX research network:\n\n**Key findings:**\n- Significant progress in this area over 2023–24, with 847K+ papers indexed\n- Leading methodology combines computational modelling with wet-lab validation\n- Community consensus favours a 3-tier verification approach\n\n*Connect your OpenAI API key in Vercel environment variables to enable live AI responses.*`,
     };
-    setMessages((prev) => [...prev, aiMsg]);
-    setIsLoading(false);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
-  };
-
-  const formatContent = (content: string) => {
-    return content
-      .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.*?)\*/g, "<em>$1</em>")
-      .replace(/\n/g, "<br/>");
-  };
+    setMsgs(p => [...p, aiMsg]);
+    setLoading(false);
+  }
 
   return (
-    <div className="container-platform py-8 h-[calc(100vh-56px)] flex flex-col">
-      <div className="flex gap-8 h-full">
-        {/* Chat column */}
-        <div className="flex-1 flex flex-col min-w-0 glass-card p-0 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-[var(--border-subtle)]">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--green-deep)] to-[var(--green-neon)] flex items-center justify-center">
-              <Zap size={18} className="text-[#0d1117]" />
-            </div>
-            <div>
-              <h1 className="text-[16px] font-bold" style={{ fontFamily: "var(--font-display)" }}>VEXY AI</h1>
-              <p className="text-[12px] text-[var(--green-neon)]">● Online · Research Mode</p>
-            </div>
-            <button onClick={() => setMessages([{ id: "welcome", role: "assistant", content: "New session started. What would you like to research?", timestamp: new Date() }])} className="ml-auto btn-ghost text-[13px]">
-              <RefreshCw size={14} />New Session
+    <div style={{ height: "calc(100vh - 56px)", display: "flex", overflow: "hidden" }}>
+      {/* Chat panel */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--surface)" }}>
+        {/* Header */}
+        <div style={{ padding: "16px 24px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 12, background: "var(--surface)", flexShrink: 0 }}>
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Sparkles size={17} color="#fff" />
+          </div>
+          <div>
+            <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 16, color: "var(--ink)" }}>VEXY AI</h1>
+            <p style={{ fontSize: 12, color: "var(--green-3)", fontWeight: 500 }}>● Research Co-pilot · GPT-4o</p>
+          </div>
+          <button onClick={() => setMsgs([{ id: "0", role: "assistant", content: "New session started. What would you like to research?", time: new Date() }])}
+            style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 6, padding: "6px 14px", borderRadius: 20, fontSize: 13, color: "var(--muted)", border: "1px solid var(--border)", background: "transparent", cursor: "pointer", transition: "all 0.15s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border-2)"; (e.currentTarget as HTMLElement).style.color = "var(--ink)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--muted)"; }}>
+            <RefreshCw size={12} />New Session
+          </button>
+        </div>
+
+        {/* Messages */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "24px", display: "flex", flexDirection: "column", gap: 16 }}>
+          <AnimatePresence initial={false}>
+            {msgs.map(m => (
+              <motion.div key={m.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.25 }}
+                style={{ display: "flex", justifyContent: m.role === "user" ? "flex-end" : "flex-start", gap: 10, alignItems: "flex-start" }}>
+                {m.role === "assistant" && (
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
+                    <Sparkles size={12} color="#fff" />
+                  </div>
+                )}
+                <div style={{ maxWidth: "76%", padding: "11px 15px", borderRadius: m.role === "user" ? "16px 16px 4px 16px" : "16px 16px 16px 4px", background: m.role === "user" ? "var(--ink)" : "var(--surface-2)", color: m.role === "user" ? "#fff" : "var(--ink)", fontSize: 14, lineHeight: 1.65, border: m.role === "assistant" ? "1px solid var(--border)" : "none" }}>
+                  <p dangerouslySetInnerHTML={{ __html: format(m.content) }} />
+                  <p style={{ fontSize: 11, color: m.role === "user" ? "rgba(255,255,255,0.5)" : "var(--subtle)", marginTop: 8 }}>
+                    {m.time.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+            {loading && (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Sparkles size={12} color="#fff" />
+                </div>
+                <div style={{ padding: "11px 15px", background: "var(--surface-2)", borderRadius: "16px 16px 16px 4px", border: "1px solid var(--border)", display: "flex", gap: 5, alignItems: "center" }}>
+                  {[0, 1, 2].map(i => (
+                    <motion.div key={i} style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--green)" }}
+                      animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.2, repeat: Infinity, delay: i * 0.2 }} />
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input */}
+        <div style={{ padding: "16px 24px", borderTop: "1px solid var(--border)", background: "var(--surface)", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "flex-end" }}>
+            <textarea value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(input); } }}
+              placeholder="Ask VEXY anything about science, research, or data…" rows={1}
+              style={{ flex: 1, resize: "none", border: "1px solid var(--border-2)", borderRadius: 12, padding: "11px 15px", fontSize: 14, color: "var(--ink)", background: "var(--surface-2)", outline: "none", fontFamily: "inherit", lineHeight: 1.5, maxHeight: 120 }} />
+            <button onClick={() => send(input)} disabled={!input.trim() || loading}
+              style={{ width: 42, height: 42, borderRadius: 12, background: input.trim() ? "var(--ink)" : "var(--surface-3)", border: "none", cursor: input.trim() ? "pointer" : "default", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+              <Send size={16} color={input.trim() ? "#fff" : "var(--subtle)"} />
             </button>
           </div>
+          <p style={{ fontSize: 11.5, color: "var(--subtle)", marginTop: 8, textAlign: "center" }}>VEXY analyses the LABVEX research network. Verify critical findings against primary literature.</p>
+        </div>
+      </div>
 
-          {/* Messages */}
-          <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
-            <AnimatePresence initial={false}>
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {msg.role === "assistant" && (
-                    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--green-deep)] to-[var(--green-neon)] flex items-center justify-center shrink-0 mr-2.5 mt-0.5">
-                      <Zap size={12} className="text-[#0d1117]" />
-                    </div>
-                  )}
-                  <div className={msg.role === "user" ? "vexy-message-user" : "vexy-message-ai"}>
-                    <p
-                      className="text-[14px] leading-relaxed"
-                      dangerouslySetInnerHTML={{ __html: formatContent(msg.content) }}
-                    />
-                    <p className="text-[11px] text-[var(--text-muted)] mt-2">
-                      {msg.timestamp.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-              {isLoading && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--green-deep)] to-[var(--green-neon)] flex items-center justify-center shrink-0 mr-2.5">
-                    <Zap size={12} className="text-[#0d1117]" />
-                  </div>
-                  <TypingIndicator />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <div ref={messagesEndRef} />
-          </div>
-
-          {/* Input */}
-          <div className="px-5 pb-5 pt-3 border-t border-[var(--border-subtle)]">
-            <div className="flex items-end gap-3">
-              <textarea
-                className="input-field flex-1 resize-none text-[14px] min-h-[48px] max-h-32 py-3"
-                placeholder="Ask VEXY anything about science, research, or data..."
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                rows={1}
-              />
-              <button
-                onClick={() => sendMessage(input)}
-                disabled={!input.trim() || isLoading}
-                className="btn-primary p-3 shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Send size={16} />
-              </button>
-            </div>
-            <p className="text-[11px] text-[var(--text-muted)] mt-2 text-center">
-              VEXY analyses the LABVEX research network. Responses are AI-generated — verify critical findings.
-            </p>
+      {/* Right panel */}
+      <div style={{ width: 280, borderLeft: "1px solid var(--border)", background: "var(--surface-2)", display: "flex", flexDirection: "column", gap: 0, overflowY: "auto" }} className="hidden lg:flex">
+        {/* Quick prompts */}
+        <div style={{ padding: "20px 18px", borderBottom: "1px solid var(--border)" }}>
+          <h3 style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 }}>Quick Prompts</h3>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {PROMPTS.map(p => {
+              const Icon = p.icon;
+              return (
+                <button key={p.label} onClick={() => send(p.prompt)}
+                  style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", textAlign: "left", transition: "all 0.15s" }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(92,203,95,0.3)"; (e.currentTarget as HTMLElement).style.background = "rgba(92,203,95,0.04)"; }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.background = "var(--surface)"; }}>
+                  <Icon size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
+                  <span style={{ fontSize: 13, fontWeight: 500, color: "var(--ink-2)" }}>{p.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Right panel */}
-        <aside className="w-72 shrink-0 hidden lg:flex flex-col gap-4">
-          {/* Capabilities */}
-          <div className="glass-card p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Sparkles size={14} className="text-[var(--green-neon)]" />
-              <h3 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Quick Prompts</h3>
+        {/* Stats */}
+        <div style={{ padding: "20px 18px", borderBottom: "1px solid var(--border)" }}>
+          <h3 style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 }}>VEXY Context</h3>
+          {[["Papers Indexed", "847K+"], ["Research Threads", "18,400"], ["Model", "GPT-4o"], ["Mode", "Streaming SSE"]].map(([l, v]) => (
+            <div key={l} style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+              <span style={{ fontSize: 13, color: "var(--muted)" }}>{l}</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>{v}</span>
             </div>
-            <div className="space-y-2">
-              {SUGGESTIONS.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <button
-                    key={s.label}
-                    onClick={() => sendMessage(s.prompt)}
-                    className="w-full text-left p-3 rounded-xl border border-[var(--border-subtle)] hover:border-[rgba(92,203,95,0.3)] hover:bg-[rgba(92,203,95,0.05)] transition-all group"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon size={14} className="text-[var(--text-muted)] group-hover:text-[var(--green-neon)] transition-colors" />
-                      <span className="text-[13px] font-medium group-hover:text-[var(--text-primary)] transition-colors">{s.label}</span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Context */}
-          <div className="glass-card p-5">
-            <h3 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-4">VEXY Context</h3>
-            <div className="space-y-3">
-              {[
-                { label: "Papers Indexed", value: "847K+" },
-                { label: "Research Threads", value: "18,400" },
-                { label: "Model Version", value: "GPT-4o" },
-                { label: "Response Mode", value: "Streaming" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between">
-                  <span className="text-[13px] text-[var(--text-muted)]">{item.label}</span>
-                  <span className="text-[13px] font-medium text-[var(--text-primary)]">{item.value}</span>
-                </div>
-              ))}
+        {/* Capabilities */}
+        <div style={{ padding: "20px 18px" }}>
+          <h3 style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 }}>Capabilities</h3>
+          {["Paper summarisation", "Hypothesis generation", "Methodology critique", "Cross-domain connections", "Dataset analysis"].map(c => (
+            <div key={c} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+              <div style={{ width: 18, height: 18, borderRadius: 5, background: "rgba(92,203,95,0.1)", border: "1px solid rgba(92,203,95,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Check size={10} style={{ color: "var(--green-3)" }} />
+              </div>
+              <span style={{ fontSize: 13, color: "var(--ink-2)" }}>{c}</span>
             </div>
-          </div>
-
-          {/* Disclaimer */}
-          <div className="p-4 rounded-xl border border-[rgba(255,200,0,0.15)] bg-[rgba(255,200,0,0.04)]">
-            <p className="text-[12px] text-[#fbbf24] leading-relaxed">
-              VEXY is an AI assistant. Always verify scientific claims against primary literature. Do not use for medical decisions.
-            </p>
-          </div>
-        </aside>
+          ))}
+        </div>
       </div>
     </div>
   );

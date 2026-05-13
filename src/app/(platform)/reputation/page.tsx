@@ -1,168 +1,139 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trophy, TrendingUp, Star, Award, Zap, ArrowUp, Activity } from "lucide-react";
-import { formatNumber, reputationTier } from "@/lib/utils";
+import { Award, TrendingUp, Zap, Users, Star } from "lucide-react";
+import Link from "next/link";
+
+const TIERS = [
+  { name: "Observer", min: 0, max: 100, color: "#9ca3af", desc: "New to the ecosystem" },
+  { name: "Contributor", min: 100, max: 500, color: "#3b82f6", desc: "Active researcher" },
+  { name: "Validator", min: 500, max: 1500, color: "#8b5cf6", desc: "Peer reviewer" },
+  { name: "Scholar", min: 1500, max: 5000, color: "#f59e0b", desc: "Domain expert" },
+  { name: "Pioneer", min: 5000, max: 999999, color: "#5ccb5f", desc: "DeSci leader" },
+];
 
 const LEADERBOARD = [
-  { rank: 1, username: "vexy_analyst", score: 3200, tier: "Expert", delta: 142, badges: 5 },
-  { rank: 2, username: "dr_chen_lab", score: 1840, tier: "Contributor", delta: 89, badges: 3 },
-  { rank: 3, username: "neuro_synthesis", score: 920, tier: "Contributor", delta: 34, badges: 2 },
-  { rank: 4, username: "genetics_mapper", score: 650, tier: "Member", delta: 21, badges: 1 },
-  { rank: 5, username: "longevity_lab", score: 480, tier: "Member", delta: 15, badges: 1 },
-  { rank: 6, username: "desci_builder", score: 310, tier: "Member", delta: 8, badges: 1 },
-  { rank: 7, username: "bio_pioneer", score: 190, tier: "Newcomer", delta: 5, badges: 0 },
-  { rank: 8, username: "sci_contrib", score: 120, tier: "Newcomer", delta: 3, badges: 0 },
+  { rank: 1, username: "vexy_analyst", field: "Bioinformatics", rep: 3200, tier: "Scholar", badge: "🏆", delta: "+142" },
+  { rank: 2, username: "dr_chen_lab", field: "Longevity Science", rep: 1840, tier: "Scholar", badge: "🥈", delta: "+89" },
+  { rank: 3, username: "protein_foldr", field: "Structural Biology", rep: 1620, tier: "Scholar", badge: "🥉", delta: "+67" },
+  { rank: 4, username: "neuro_synthesis", field: "Neuroscience", rep: 920, tier: "Validator", badge: null, delta: "+45" },
+  { rank: 5, username: "genetics_mapper", field: "Genomics", rep: 650, tier: "Validator", badge: null, delta: "+38" },
+  { rank: 6, username: "bio_compute_1", field: "Computational Biology", rep: 420, tier: "Contributor", badge: null, delta: "+22" },
+  { rank: 7, username: "crispr_lab_x", field: "Gene Editing", rep: 310, tier: "Contributor", badge: null, delta: "+18" },
+  { rank: 8, username: "longevity_dao", field: "DeSci", rep: 280, tier: "Contributor", badge: null, delta: "+14" },
 ];
 
-const TIER_THRESHOLDS = [
-  { tier: "Newcomer", min: 0, max: 200, color: "#4d5566", description: "Just joined the scientific community" },
-  { tier: "Member", min: 200, max: 800, color: "#8b949e", description: "Active contributor to research discussions" },
-  { tier: "Contributor", min: 800, max: 2000, color: "#5ccb5f", description: "Recognized scientific contributor" },
-  { tier: "Expert", min: 2000, max: 5000, color: "#60a5fa", description: "Respected expert in the community" },
-  { tier: "Distinguished", min: 5000, max: 99999, color: "#a78bfa", description: "Elite scientific authority" },
-];
+const MY_REP = 920;
+const MY_TIER = TIERS.find(t => MY_REP >= t.min && MY_REP < t.max)!;
+const NEXT_TIER = TIERS[TIERS.indexOf(MY_TIER) + 1];
 
-const REPUTATION_EVENTS = [
-  { type: "post_upvoted", description: "Your CRISPR post received 10 upvotes", points: 25, time: "2h ago" },
-  { type: "mission_completed", description: "Completed: Summarize a Longevity Paper", points: 50, time: "1d ago" },
-  { type: "comment_upvoted", description: "Your comment on telomere research was upvoted", points: 10, time: "2d ago" },
-  { type: "review_given", description: "Provided peer review on a hypothesis", points: 30, time: "3d ago" },
-];
+const AVATARS = ["linear-gradient(135deg,#5ccb5f,#2e8b57)", "linear-gradient(135deg,#3b82f6,#1d4ed8)", "linear-gradient(135deg,#8b5cf6,#6d28d9)", "linear-gradient(135deg,#f59e0b,#d97706)"];
 
 export default function ReputationPage() {
-  const myScore = 650;
-  const myTier = reputationTier(myScore);
-  const nextTier = TIER_THRESHOLDS.find((t) => t.min > myScore);
-  const currentThreshold = TIER_THRESHOLDS.find((t) => myScore >= t.min && myScore < t.max);
-  const progress = currentThreshold
-    ? ((myScore - currentThreshold.min) / (currentThreshold.max - currentThreshold.min)) * 100
-    : 100;
+  const progress = NEXT_TIER ? ((MY_REP - MY_TIER.min) / (NEXT_TIER.min - MY_TIER.min)) * 100 : 100;
 
   return (
-    <div className="container-platform py-8">
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mb-10">
-        <div className="badge badge-green mb-4"><Trophy size={11} />Reputation System</div>
-        <h1 className="text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-display)" }}>Scientific Reputation</h1>
-        <p className="text-[var(--text-secondary)] text-[15px] max-w-xl">
-          Your credibility score reflects contribution quality, peer validation, and community impact across the LABVEX ecosystem.
-        </p>
-      </motion.div>
+    <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ display: "flex", gap: 24 }}>
+        {/* Main */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 22, color: "var(--ink)", letterSpacing: "-0.02em", marginBottom: 4 }}>Reputation</h1>
+          <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 24 }}>Your on-chain scientific standing, earned through verifiable contributions.</p>
 
-      <div className="grid lg:grid-cols-3 gap-6 mb-8">
-        {/* My reputation card */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card p-6 lg:col-span-1">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-4">Your Reputation</h2>
-          <div className="text-center mb-6">
-            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[var(--green-deep)] to-[var(--green-neon)] flex items-center justify-center mx-auto mb-4 text-2xl font-bold text-[#0d1117]" style={{ fontFamily: "var(--font-display)" }}>
-              G
+          {/* My rep card */}
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 16, padding: "24px", marginBottom: 20, boxShadow: "var(--shadow-md)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <span style={{ color: "#fff", fontSize: 20, fontWeight: 700 }}>N</span>
+              </div>
+              <div>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 17, color: "var(--ink)" }}>neuro_synthesis</p>
+                <p style={{ fontSize: 13, color: "var(--muted)" }}>Neuroscience · MIT</p>
+              </div>
+              <div style={{ marginLeft: "auto", textAlign: "right" }}>
+                <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 28, color: MY_TIER.color, letterSpacing: "-0.03em" }}>{MY_REP.toLocaleString()}</p>
+                <p style={{ fontSize: 12, color: "var(--muted)" }}>reputation points</p>
+              </div>
             </div>
-            <div className="text-4xl font-bold gradient-text mb-1" style={{ fontFamily: "var(--font-display)" }}>{formatNumber(myScore)}</div>
-            <div className="badge badge-green mx-auto">{myTier.label}</div>
+
+            {/* Tier progress */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <span style={{ fontSize: 13, fontWeight: 600, color: MY_TIER.color }}>{MY_TIER.name}</span>
+              {NEXT_TIER && <span style={{ fontSize: 12, color: "var(--muted)" }}>{NEXT_TIER.min - MY_REP} rep to {NEXT_TIER.name}</span>}
+            </div>
+            <div style={{ height: 6, background: "var(--surface-3)", borderRadius: 3, overflow: "hidden" }}>
+              <motion.div initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 1, ease: "easeOut" as const }}
+                style={{ height: "100%", background: `linear-gradient(90deg,${MY_TIER.color},${NEXT_TIER?.color || MY_TIER.color})`, borderRadius: 3 }} />
+            </div>
+          </motion.div>
+
+          {/* Tier cards */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", gap: 8, marginBottom: 28 }}>
+            {TIERS.map((t, i) => {
+              const active = t.name === MY_TIER.name;
+              const unlocked = MY_REP >= t.min;
+              return (
+                <div key={t.name} style={{ padding: "14px 12px", borderRadius: 12, border: `1px solid ${active ? t.color + "40" : "var(--border)"}`, background: active ? t.color + "08" : "var(--surface)", textAlign: "center", opacity: unlocked ? 1 : 0.5 }}>
+                  <Star size={16} style={{ color: t.color, margin: "0 auto 6px" }} />
+                  <p style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 12.5, color: active ? t.color : "var(--ink)", marginBottom: 2 }}>{t.name}</p>
+                  <p style={{ fontSize: 10.5, color: "var(--subtle)" }}>{t.min >= 5000 ? "5K+" : `${t.min}+`}</p>
+                </div>
+              );
+            })}
           </div>
-          {/* Progress to next tier */}
-          {nextTier && (
+
+          {/* Leaderboard */}
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14 }}>
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <h2 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 600, fontSize: 15, color: "var(--ink)" }}>Global Leaderboard</h2>
+              <span className="badge badge-gray" style={{ fontSize: 11 }}>This week</span>
+            </div>
             <div>
-              <div className="flex justify-between text-[12px] text-[var(--text-muted)] mb-2">
-                <span>Progress to {nextTier.tier}</span>
-                <span>{myScore} / {currentThreshold?.max}</span>
-              </div>
-              <div className="rep-bar">
-                <motion.div className="rep-bar-fill" initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 1.2, delay: 0.3 }} />
-              </div>
-            </div>
-          )}
-        </motion.div>
-
-        {/* Tiers */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card p-6 lg:col-span-2">
-          <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-5">Reputation Tiers</h2>
-          <div className="space-y-3">
-            {TIER_THRESHOLDS.map((tier) => {
-              const isActive = myTier.label === tier.tier;
-              return (
-                <div key={tier.tier} className={`flex items-center gap-4 p-3 rounded-xl transition-all ${isActive ? "border border-[rgba(92,203,95,0.3)] bg-[rgba(92,203,95,0.05)]" : "opacity-60"}`}>
-                  <div className="w-3 h-3 rounded-full shrink-0" style={{ background: tier.color, boxShadow: isActive ? `0 0 10px ${tier.color}80` : "none" }} />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[14px] font-semibold" style={{ color: isActive ? tier.color : "var(--text-secondary)" }}>{tier.tier}</span>
-                      {isActive && <span className="badge badge-green text-[10px]">Current</span>}
+              {LEADERBOARD.map((r, i) => {
+                const isMe = r.username === "neuro_synthesis";
+                const tier = TIERS.find(t => r.rep >= t.min && r.rep < t.max)!;
+                return (
+                  <motion.div key={r.rank} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.04, duration: 0.35 }}
+                    style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 20px", borderBottom: i < LEADERBOARD.length - 1 ? "1px solid var(--border)" : "none", background: isMe ? "rgba(92,203,95,0.03)" : "transparent" }}>
+                    <span style={{ width: 24, textAlign: "center", fontSize: r.badge ? 18 : 13, fontWeight: r.badge ? 400 : 600, color: r.badge ? undefined : "var(--muted)" }}>{r.badge || r.rank}</span>
+                    <div style={{ width: 34, height: 34, borderRadius: "50%", background: AVATARS[i % 4], display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>{r.username[0].toUpperCase()}</span>
                     </div>
-                    <p className="text-[12px] text-[var(--text-muted)]">{tier.description}</p>
-                  </div>
-                  <span className="text-[12px] text-[var(--text-muted)] shrink-0">
-                    {formatNumber(tier.min)}{tier.max < 99999 ? `–${formatNumber(tier.max)}` : "+"}
-                  </span>
-                </div>
-              );
-            })}
+                    <div style={{ flex: 1 }}>
+                      <Link href={`/profile/${r.username}`} style={{ fontSize: 13.5, fontWeight: isMe ? 700 : 500, color: "var(--ink)" }}>@{r.username}</Link>
+                      <p style={{ fontSize: 11.5, color: "var(--subtle)" }}>{r.field}</p>
+                    </div>
+                    <span style={{ fontSize: 11.5, fontWeight: 600, color: tier.color, padding: "2px 8px", borderRadius: 99, background: tier.color + "12", border: `1px solid ${tier.color}28` }}>{r.tier}</span>
+                    <span style={{ fontSize: 12, color: "var(--green-3)", fontWeight: 600, width: 44, textAlign: "right" }}>{r.delta}</span>
+                    <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--ink)", width: 52, textAlign: "right", letterSpacing: "-0.01em" }}>{r.rep.toLocaleString()}</span>
+                  </motion.div>
+                );
+              })}
+            </div>
           </div>
-        </motion.div>
-      </div>
+        </div>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Leaderboard */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Star size={15} className="text-[var(--green-neon)]" />
-            <h2 className="text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Global Leaderboard</h2>
-          </div>
-          <div className="space-y-2">
-            {LEADERBOARD.map((entry) => {
-              const tier = reputationTier(entry.score);
-              return (
-                <div key={entry.username} className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${entry.username === "genetics_mapper" ? "border border-[rgba(92,203,95,0.2)] bg-[rgba(92,203,95,0.04)]" : "hover:bg-[var(--glass-bg)]"}`}>
-                  <span className={`text-[13px] font-bold w-5 text-center ${entry.rank <= 3 ? "text-[var(--green-neon)]" : "text-[var(--text-muted)]"}`}>{entry.rank}</span>
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--green-deep)] to-[var(--green-neon)] flex items-center justify-center text-[10px] font-bold text-[#0d1117] shrink-0">
-                    {entry.username[0].toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-medium truncate">@{entry.username}</p>
-                    <p className="text-[11px]" style={{ color: tier.color }}>{entry.tier}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[14px] font-bold">{formatNumber(entry.score)}</p>
-                    <p className="text-[11px] text-[var(--green-neon)] flex items-center gap-0.5 justify-end">
-                      <ArrowUp size={9} />+{entry.delta}
-                    </p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
-
-        {/* Recent events */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="glass-card p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Activity size={15} className="text-[var(--green-neon)]" />
-            <h2 className="text-[15px] font-semibold" style={{ fontFamily: "var(--font-display)" }}>Recent Activity</h2>
-          </div>
-          <div className="space-y-3">
-            {REPUTATION_EVENTS.map((event, i) => (
-              <motion.div key={i} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + i * 0.07 }} className="flex items-start gap-3 p-3 rounded-xl border border-[var(--border-subtle)]">
-                <div className="w-8 h-8 rounded-lg bg-[rgba(92,203,95,0.1)] border border-[rgba(92,203,95,0.2)] flex items-center justify-center shrink-0">
-                  <Zap size={13} className="text-[var(--green-neon)]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] text-[var(--text-primary)] leading-snug">{event.description}</p>
-                  <p className="text-[12px] text-[var(--text-muted)] mt-0.5">{event.time}</p>
-                </div>
-                <span className="badge badge-green text-[12px] shrink-0">+{event.points}</span>
-              </motion.div>
+        {/* Right sidebar */}
+        <aside style={{ width: 260, flexShrink: 0, display: "flex", flexDirection: "column", gap: 14 }} className="hidden xl:flex">
+          {/* How to earn */}
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 18px" }}>
+            <h3 style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 }}>How to earn rep</h3>
+            {[{ a: "Post research", r: "+10–50" }, { a: "Complete mission", r: "+50–500" }, { a: "Peer review", r: "+25–180" }, { a: "VEXY analysis", r: "+15" }, { a: "Receive upvotes", r: "+2/vote" }, { a: "Onboard scientist", r: "+75" }].map(({ a, r }) => (
+              <div key={a} style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                <span style={{ fontSize: 13, color: "var(--muted)" }}>{a}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--green-3)" }}>{r}</span>
+              </div>
             ))}
           </div>
 
-          <div className="mt-5 p-4 rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-surface)]">
-            <p className="text-[13px] font-semibold mb-3" style={{ fontFamily: "var(--font-display)" }}>Earn More Reputation</p>
-            <div className="space-y-1.5 text-[13px] text-[var(--text-secondary)]">
-              <p>• Post quality research — <span className="text-[var(--green-neon)]">+5–50 per upvote</span></p>
-              <p>• Complete missions — <span className="text-[var(--green-neon)]">+40–200 per mission</span></p>
-              <p>• Peer review threads — <span className="text-[var(--green-neon)]">+30 per review</span></p>
-              <p>• Receive badges — <span className="text-[var(--green-neon)]">+100 bonus</span></p>
-            </div>
+          {/* Quick actions */}
+          <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 14, padding: "18px 18px" }}>
+            <h3 style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 }}>Quick actions</h3>
+            <Link href="/missions" className="btn btn-dark" style={{ width: "100%", justifyContent: "center", fontSize: 13.5, marginBottom: 8 }}>View Missions</Link>
+            <Link href="/feed" className="btn btn-outline" style={{ width: "100%", justifyContent: "center", fontSize: 13.5 }}>Post Research</Link>
           </div>
-        </motion.div>
+        </aside>
       </div>
     </div>
   );
