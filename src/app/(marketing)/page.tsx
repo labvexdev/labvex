@@ -23,15 +23,21 @@ function Nav() {
           <span style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, fontSize:17, letterSpacing:"-0.02em", color:"var(--ink)" }}>LABVEX</span>
         </Link>
         <nav style={{ display:"flex", alignItems:"center", gap:32 }} className="hidden md:flex">
-          {["Platform","About","VEXY AI","Docs"].map(l => (
-            <Link key={l} href={l==="Platform"?"/feed":l==="VEXY AI"?"/vexy":"/about"} className="t-sm" style={{ color:"var(--muted)", fontSize:14, fontWeight:500, transition:"color 0.15s" }}
+          {["Platform","Marketplace","About","Docs"].map(l => (
+            <Link key={l} href={l==="Platform"?"/feed":l==="Marketplace"?"/marketplace":l==="About"?"/about":"/docs"} className="t-sm" style={{ color:"var(--muted)", fontSize:14, fontWeight:500, transition:"color 0.15s" }}
               onMouseEnter={e=>(e.currentTarget.style.color="var(--ink)")}
               onMouseLeave={e=>(e.currentTarget.style.color="var(--muted)")}>{l}</Link>
           ))}
         </nav>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <Link href="/feed" className="btn btn-outline" style={{ fontSize:14, padding:"0.5rem 1.1rem" }}>Sign in</Link>
-          <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Get started <ArrowRight size={14}/></Link>
+          <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", transition: "background 0.15s" }}
+            onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
+            onMouseLeave={e => (e.currentTarget.style.background = "var(--surface)")}
+          >
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
+            <span className="font-mono" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Connect Wallet</span>
+          </button>
+          <Link href="/feed" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Launch App <ArrowRight size={14}/></Link>
         </div>
       </div>
     </header>
@@ -56,7 +62,7 @@ function Hero() {
         </motion.div>
 
         <motion.h1 className="t-hero text-balance" style={{ marginBottom:24 }} {...fade(0.05)}>
-          The operating system<br/>for <span className="t-green">decentralised science</span>
+          Verify Data.<br/><span className="t-green">Own the Discovery.</span>
         </motion.h1>
 
         <motion.p className="t-lead text-balance" style={{ maxWidth:480, margin:"0 auto 40px" }} {...fade(0.1)}>
@@ -68,12 +74,16 @@ function Hero() {
           <Link href="/vexy" className="btn btn-outline" style={{ fontSize:15, padding:"0.8rem 1.75rem" }}><Sparkles size={15} style={{ color:"var(--green)" }}/> Try VEXY AI</Link>
         </motion.div>
 
-        {/* Social proof */}
-        <motion.div style={{ marginTop:56, display:"flex", alignItems:"center", justifyContent:"center", gap:32, flexWrap:"wrap" }} {...fade(0.2)}>
-          {[["2,400+","Researchers"],["18K+","Publications"],["Solana","Blockchain"],["GPT-4o","AI Engine"]].map(([v,l])=>(
+        {/* Live Ecosystem Pulse */}
+        <motion.div style={{ marginTop:56, display:"flex", alignItems:"center", justifyContent:"center", gap:48, flexWrap:"wrap" }} {...fade(0.2)}>
+          {[
+            ["Active Researches", "1,204"],
+            ["Total IP Value", "$14.2M"],
+            ["Verified PhDs", "842"]
+          ].map(([l,v])=>(
             <div key={l} style={{ textAlign:"center" }}>
-              <div style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, fontSize:20, letterSpacing:"-0.02em", color:"var(--ink)" }}>{v}</div>
-              <div style={{ fontSize:12, color:"var(--subtle)", marginTop:2 }}>{l}</div>
+              <div className="font-mono" style={{ fontWeight:700, fontSize:22, color:"var(--ink)" }}>{v}</div>
+              <div style={{ fontSize:12, color:"var(--subtle)", marginTop:4, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>{l}</div>
             </div>
           ))}
         </motion.div>
@@ -300,10 +310,15 @@ function Footer() {
           </div>
         </div>
         <div className="hr"/>
-        <div style={{ display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:8 }}>
-          <p style={{ fontSize:12.5, color:"var(--subtle)" }}>© {new Date().getFullYear()} LABVEX. Building the open scientific stack.</p>
-          <div style={{ display:"flex", gap:20 }}>
-            {["Privacy","Terms"].map(t=><Link key={t} href="#" style={{ fontSize:12.5,color:"var(--subtle)" }}>{t}</Link>)}
+        <div style={{ display:"flex", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
+          <div>
+            <p style={{ fontSize:12.5, color:"var(--subtle)", marginBottom: 8 }}>© {new Date().getFullYear()} LABVEX. Building the open scientific stack.</p>
+            <p style={{ fontSize: 11, color: "var(--subtle)", maxWidth: 600, lineHeight: 1.5 }}>
+              <strong>Medical Disclaimer:</strong> The information provided on LABVEX is for scientific research purposes only and does not constitute medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider.
+            </p>
+          </div>
+          <div style={{ display:"flex", gap:20, alignItems: "flex-end" }}>
+            {["Privacy","Terms","Informed Consent Protocol"].map(t=><Link key={t} href={t === "Informed Consent Protocol" ? "/docs/consent" : "#"} style={{ fontSize:12.5,color:"var(--subtle)", fontWeight: t === "Informed Consent Protocol" ? 600 : 400 }}>{t}</Link>)}
           </div>
         </div>
       </div>

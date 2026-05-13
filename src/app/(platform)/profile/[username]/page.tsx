@@ -1,9 +1,10 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Trophy, Star, Zap, Edit, ExternalLink, Wallet, Activity, FileText, Bookmark } from "lucide-react";
-import { formatNumber, reputationTier, truncateAddress } from "@/lib/utils";
+import { ShieldCheck, CalendarClock, Wallet, ExternalLink, Activity, Network, Trophy } from "lucide-react";
 import Link from "next/link";
+import { formatNumber, truncateAddress } from "@/lib/utils";
+import { useEffect, useState } from "react";
 
 const MOCK_USER = {
   username: "genetics_mapper",
@@ -17,172 +18,162 @@ const MOCK_USER = {
   stats: { posts: 24, comments: 137, upvotes_received: 842, missions_completed: 8 },
 };
 
-const BADGE_CONFIG: Record<string, { color: string; bg: string; icon: typeof Star }> = {
-  "Research Contributor": { color: "#5ccb5f", bg: "rgba(92,203,95,0.1)", icon: FileText },
-  "Reviewer": { color: "#60a5fa", bg: "rgba(96,165,250,0.1)", icon: Star },
-  "AI Analyst": { color: "#a78bfa", bg: "rgba(167,139,250,0.1)", icon: Zap },
-  "Early Scientist": { color: "#f59e0b", bg: "rgba(245,158,11,0.1)", icon: Trophy },
-  "Community Builder": { color: "#f87171", bg: "rgba(248,113,113,0.1)", icon: Activity },
-};
-
-const RECENT_POSTS = [
-  { id: "1", title: "CRISPR-Cas9 efficiency improvements with modified guide RNA structures", upvotes: 94, comments: 16, time: "2d ago" },
-  { id: "2", title: "Validating AI-predicted gene expression patterns in vivo", upvotes: 67, comments: 9, time: "5d ago" },
-  { id: "3", title: "Open dataset: Off-target CRISPR edits across 14 human cell lines", upvotes: 143, comments: 31, time: "1w ago" },
-];
-
-export default function ProfilePage({ params }: { params: { username: string } }) {
-  const user = MOCK_USER;
-  const tier = reputationTier(user.reputation_score);
-  const isOwnProfile = params.username === "me" || params.username === user.username;
+function CircularGauge({ score }: { score: number }) {
+  const percentage = Math.min((score / 1000) * 100, 100);
+  const strokeDasharray = `${percentage} 100`;
 
   return (
-    <div className="container-platform py-8">
-      <div className="max-w-4xl mx-auto">
-        {/* Profile header card */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="glass-card p-6 mb-6">
-          <div className="flex flex-col sm:flex-row items-start gap-5">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--green-deep)] to-[var(--green-neon)] flex items-center justify-center text-3xl font-bold text-[#0d1117]" style={{ fontFamily: "var(--font-display)" }}>
-                {user.display_name[0]}
-              </div>
-              <div className="absolute -bottom-1.5 -right-1.5 w-6 h-6 rounded-full bg-[var(--green-neon)] border-2 border-[var(--bg-graphite)] flex items-center justify-center">
-                <Star size={10} className="text-[#0d1117]" />
-              </div>
-            </div>
+    <div style={{ position: "relative", width: 140, height: 140, display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <svg width="140" height="140" viewBox="0 0 36 36" style={{ transform: "rotate(-90deg)" }}>
+        {/* Background track */}
+        <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--surface-3)" strokeWidth="3" />
+        {/* Fill */}
+        <motion.path 
+          initial={{ strokeDasharray: "0 100" }}
+          animate={{ strokeDasharray }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="var(--green-3)" strokeWidth="3" strokeLinecap="round" 
+        />
+      </svg>
+      <div style={{ position: "absolute", textAlign: "center" }}>
+        <div className="font-mono" style={{ fontSize: 28, fontWeight: 700, color: "var(--ink)", lineHeight: 1 }}>{score}</div>
+        <div style={{ fontSize: 10, color: "var(--subtle)", textTransform: "uppercase", letterSpacing: "0.05em", marginTop: 4, fontWeight: 600 }}>Score</div>
+      </div>
+    </div>
+  );
+}
 
-            {/* Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-start justify-between gap-4 flex-wrap">
-                <div>
-                  <h1 className="text-2xl font-bold" style={{ fontFamily: "var(--font-display)" }}>{user.display_name}</h1>
-                  <p className="text-[14px] text-[var(--text-muted)]">@{user.username}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {isOwnProfile && (
-                    <button className="btn-ghost text-[13px]"><Edit size={14} />Edit Profile</button>
-                  )}
-                </div>
-              </div>
+export default function IdentityTerminal({ params }: { params: { username: string } }) {
+  const user = MOCK_USER;
+  const isOwnProfile = params.username === "me" || params.username === user.username;
+  const [decayDays, setDecayDays] = useState(547); // 18 months
 
-              <p className="text-[14px] text-[var(--text-secondary)] mt-3 mb-4 leading-relaxed max-w-lg">{user.bio}</p>
-
-              <div className="flex flex-wrap items-center gap-3">
-                {/* Wallet */}
-                <div className="flex items-center gap-1.5 text-[12px] text-[var(--text-muted)] bg-[var(--bg-surface)] px-3 py-1.5 rounded-lg border border-[var(--border-subtle)]">
-                  <Wallet size={12} />
-                  {truncateAddress(user.wallet_address)}
-                  <ExternalLink size={10} className="text-[var(--text-muted)]" />
-                </div>
-                {/* Tier */}
-                <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-semibold border" style={{ color: tier.color, borderColor: `${tier.color}30`, background: `${tier.color}10` }}>
-                  <Trophy size={11} />{tier.label}
-                </div>
-                {/* Joined */}
-                <span className="text-[12px] text-[var(--text-muted)]">Member since Jan 2025</span>
-              </div>
-            </div>
+  return (
+    <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+        
+        {/* Header Title */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+          <div>
+            <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 22, color: "var(--ink)", letterSpacing: "-0.02em" }}>Identity Terminal</h1>
+            <p style={{ fontSize: 13, color: "var(--muted)", marginTop: 2 }}>Verifiable credentials and reputation data</p>
           </div>
-        </motion.div>
+          {isOwnProfile && (
+            <button className="btn btn-outline" style={{ fontSize: 13.5, padding: "0.5rem 1.1rem" }}>
+              Edit Credentials
+            </button>
+          )}
+        </div>
 
-        {/* Stats */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 }} className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-          {[
-            { label: "Reputation", value: formatNumber(user.reputation_score), color: "#5ccb5f" },
-            { label: "Posts", value: user.stats.posts.toString(), color: "#60a5fa" },
-            { label: "Upvotes Received", value: formatNumber(user.stats.upvotes_received), color: "#a78bfa" },
-            { label: "Missions Done", value: user.stats.missions_completed.toString(), color: "#f59e0b" },
-          ].map((s) => (
-            <div key={s.label} className="glass-card p-4 text-center">
-              <div className="text-2xl font-bold mb-1 gradient-text" style={{ fontFamily: "var(--font-display)" }}>{s.value}</div>
-              <div className="text-[12px] text-[var(--text-muted)]">{s.label}</div>
-            </div>
-          ))}
-        </motion.div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {/* Main content */}
-          <div className="md:col-span-2 space-y-5">
-            {/* Badges */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.12 }} className="glass-card p-5">
-              <h2 className="text-[15px] font-semibold mb-4" style={{ fontFamily: "var(--font-display)" }}>Badges</h2>
-              <div className="flex flex-wrap gap-3">
-                {user.badges.map((badge) => {
-                  const cfg = BADGE_CONFIG[badge] ?? { color: "#8b949e", bg: "rgba(139,148,158,0.1)", icon: Star };
-                  const Icon = cfg.icon;
-                  return (
-                    <div key={badge} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border" style={{ background: cfg.bg, borderColor: `${cfg.color}30` }}>
-                      <Icon size={14} style={{ color: cfg.color }} />
-                      <span className="text-[13px] font-semibold" style={{ color: cfg.color }}>{badge}</span>
-                    </div>
-                  );
-                })}
-                {/* Locked badges */}
-                {["Reviewer", "AI Analyst", "Community Builder"].filter((b) => !user.badges.includes(b)).map((badge) => (
-                  <div key={badge} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border-subtle)] opacity-40 cursor-not-allowed">
-                    <Star size={14} className="text-[var(--text-muted)]" />
-                    <span className="text-[13px] text-[var(--text-muted)]">{badge}</span>
+        {/* Top Section: Identity & Reputation */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 340px", gap: 24, marginBottom: 24 }} className="lg:grid-cols-2 lg:flex-col lg:grid-cols-1">
+          
+          {/* Main Identity Card */}
+          <div className="card" style={{ padding: 32, display: "flex", flexDirection: "column", gap: 24 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 20 }}>
+              <div style={{ width: 80, height: 80, borderRadius: 20, background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, boxShadow: "var(--shadow-sm)" }}>
+                <span style={{ color: "#fff", fontSize: 28, fontWeight: 700 }}>{user.display_name[0]}</span>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
+                  <h2 style={{ fontSize: 24, fontWeight: 700, color: "var(--ink)", letterSpacing: "-0.02em" }}>{user.display_name}</h2>
+                  <div className="badge badge-green" style={{ background: "rgba(92,203,95,0.1)", border: "1px solid rgba(92,203,95,0.2)" }}>
+                    <ShieldCheck size={12} style={{ marginRight: 4 }} /> ZK-Passport Valid
                   </div>
-                ))}
+                </div>
+                <p style={{ fontSize: 14, color: "var(--muted)", marginBottom: 12 }}>@{user.username} · Member since 2025</p>
+                <p style={{ fontSize: 14.5, color: "var(--ink-2)", lineHeight: 1.6, maxWidth: 460 }}>{user.bio}</p>
               </div>
-            </motion.div>
+            </div>
 
-            {/* Recent posts */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.16 }} className="glass-card p-5">
-              <h2 className="text-[15px] font-semibold mb-4" style={{ fontFamily: "var(--font-display)" }}>Recent Research</h2>
-              <div className="space-y-3">
-                {RECENT_POSTS.map((post) => (
-                  <Link key={post.id} href={`/feed/${post.id}`} className="block p-3 rounded-xl border border-[var(--border-subtle)] hover:border-[rgba(92,203,95,0.2)] hover:bg-[var(--glass-bg)] transition-all">
-                    <p className="text-[14px] font-medium text-[var(--text-primary)] mb-2 leading-snug">{post.title}</p>
-                    <div className="flex items-center gap-4 text-[12px] text-[var(--text-muted)]">
-                      <span>↑ {post.upvotes}</span>
-                      <span>💬 {post.comments}</span>
-                      <span className="ml-auto">{post.time}</span>
-                    </div>
-                  </Link>
-                ))}
+            <div className="hr" />
+
+            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 10, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+                <Wallet size={14} style={{ color: "var(--muted)" }} />
+                <span className="font-mono" style={{ fontSize: 13, color: "var(--ink)", fontWeight: 500 }}>{truncateAddress(user.wallet_address)}</span>
+                <ExternalLink size={12} style={{ color: "var(--subtle)", marginLeft: 4, cursor: "pointer" }} />
               </div>
-            </motion.div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 10, background: "rgba(212,175,55,0.06)", border: "1px solid rgba(212,175,55,0.2)" }}>
+                <Trophy size={14} style={{ color: "var(--gold)" }} />
+                <span style={{ fontSize: 13, color: "#b48b11", fontWeight: 600 }}>Scholar Tier</span>
+              </div>
+            </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-5">
-            {/* Interests */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.18 }} className="glass-card p-5">
-              <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-4">Research Interests</h2>
-              <div className="flex flex-wrap gap-2">
-                {user.interests.map((interest) => (
-                  <span key={interest} className="badge badge-green text-[12px]">{interest}</span>
-                ))}
-              </div>
-            </motion.div>
+          {/* Reputation Gauge Card */}
+          <div className="card" style={{ padding: 32, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center" }}>
+            <h3 style={{ fontSize: 12, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 24 }}>Reputation Score</h3>
+            
+            <CircularGauge score={user.reputation_score} />
 
-            {/* Rep progress */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22 }} className="glass-card p-5">
-              <h2 className="text-[13px] font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-4">Reputation Progress</h2>
-              <div className="text-3xl font-bold gradient-text mb-1" style={{ fontFamily: "var(--font-display)" }}>
-                {formatNumber(user.reputation_score)}
+            <div style={{ marginTop: 24, padding: "10px 16px", borderRadius: 12, background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
+              <CalendarClock size={16} style={{ color: "var(--muted)" }} />
+              <div style={{ textAlign: "left" }}>
+                <div style={{ fontSize: 11, color: "var(--subtle)", fontWeight: 500, textTransform: "uppercase", letterSpacing: "0.02em" }}>Decay Countdown</div>
+                <div className="font-mono" style={{ fontSize: 13, color: "var(--ink)", fontWeight: 600 }}>{decayDays} Days</div>
               </div>
-              <p className="text-[12px] text-[var(--text-muted)] mb-4">Next: Expert at 2,000</p>
-              <div className="rep-bar">
-                <motion.div className="rep-bar-fill" initial={{ width: 0 }} animate={{ width: "31%" }} transition={{ duration: 1.2, delay: 0.4 }} />
-              </div>
-              <p className="text-[11px] text-[var(--text-muted)] mt-2">31% toward Expert tier</p>
-            </motion.div>
+            </div>
+          </div>
 
-            {/* Bookmarks shortcut */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.26 }} className="glass-card p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Bookmark size={14} className="text-[var(--green-neon)]" />
-                <h2 className="text-[13px] font-semibold">Saved Posts</h2>
-              </div>
-              <p className="text-[13px] text-[var(--text-muted)]">12 bookmarked research posts</p>
-              <button className="btn-ghost text-[13px] mt-2 w-full justify-center">View Bookmarks</button>
-            </motion.div>
+        </div>
+
+        {/* Lower Section: Stats & Badges */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }} className="md:grid-cols-1">
+          {/* Network Activity */}
+          <div className="card" style={{ padding: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+              <Activity size={16} style={{ color: "var(--green-3)" }} />
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)" }}>Network Activity</h3>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {[
+                { l: "Research Posts", v: user.stats.posts },
+                { l: "Peer Reviews", v: user.stats.comments },
+                { l: "Upvotes Received", v: user.stats.upvotes_received },
+                { l: "Missions Completed", v: user.stats.missions_completed },
+              ].map(s => (
+                <div key={s.l} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontSize: 13.5, color: "var(--muted)" }}>{s.l}</span>
+                  <span className="font-mono" style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{s.v}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Specializations */}
+          <div className="card" style={{ padding: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+              <Network size={16} style={{ color: "var(--green-3)" }} />
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)" }}>Specializations</h3>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+              {user.interests.map(i => (
+                <div key={i} className="badge badge-gray" style={{ fontSize: 12.5, padding: "6px 12px" }}>
+                  {i}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* On-Chain Badges */}
+          <div className="card" style={{ padding: 24 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
+              <ShieldCheck size={16} style={{ color: "var(--green-3)" }} />
+              <h3 style={{ fontSize: 15, fontWeight: 600, color: "var(--ink)" }}>On-Chain Badges</h3>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {user.badges.map(b => (
+                <div key={b} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)" }}>
+                  <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green-3)" }} />
+                  <span style={{ fontSize: 13.5, fontWeight: 500, color: "var(--ink)" }}>{b}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+
+      </motion.div>
     </div>
   );
 }

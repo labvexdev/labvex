@@ -11,7 +11,7 @@ const PROMPTS = [
   { icon: BookOpen, label: "Explain concept", prompt: "Explain epigenetic clocks and how they measure biological age." },
 ];
 
-const WELCOME = "Hello. I'm **VEXY**, your AI research co-pilot on LABVEX.\n\nI can summarise scientific papers, generate research hypotheses, find relevant researchers, and explore complex scientific concepts.\n\nWhat would you like to explore today?";
+const WELCOME = "Hello. I'm **VEXY**, your AI research co-pilot, Matchmaker, and Knowledge Architect on LABVEX.\n\nI can cross-reference data, generate hypotheses, match you with relevant researchers for collaboration, and screen your protocols for CAS compliance.\n\nWhat would you like to explore today?";
 
 function format(text: string) {
   return text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>").replace(/\*(.*?)\*/g, "<em>$1</em>").replace(/\n/g, "<br/>");
@@ -149,7 +149,7 @@ export default function VexyPage() {
         {/* Capabilities */}
         <div style={{ padding: "20px 18px" }}>
           <h3 style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 14 }}>Capabilities</h3>
-          {["Paper summarisation", "Hypothesis generation", "Methodology critique", "Cross-domain connections", "Dataset analysis"].map(c => (
+          {["Hypothesis generation", "Researcher matchmaking", "CAS compliance screening", "Methodology critique", "Cross-domain connection mapping"].map(c => (
             <div key={c} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
               <div style={{ width: 18, height: 18, borderRadius: 5, background: "rgba(92,203,95,0.1)", border: "1px solid rgba(92,203,95,0.2)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <Check size={10} style={{ color: "var(--green-3)" }} />

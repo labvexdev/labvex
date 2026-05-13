@@ -8,10 +8,10 @@ import Link from "next/link";
 const TAGS = ["All", "AI", "Biotech", "Longevity", "Neuroscience", "Genetics", "DeSci"];
 
 const POSTS = [
-  { id: "1", author: "dr_chen_lab", field: "Longevity · Stanford", reputation: 1840, title: "TERT reactivation in somatic cells shows 40% lifespan extension in murine models", body: "Our team investigated controlled TERT reactivation as a longevity intervention. Results show a 40% median lifespan extension in C57BL/6 mice with no observable tumor formation at 18 months post-treatment.", tags: ["Longevity", "Genetics"], upvotes: 312, comments: 47, time: "2h ago", summary: "TERT reactivation extended median murine lifespan by 40% with no tumor formation, reduced p21 expression, and improved mitochondrial function." },
-  { id: "2", author: "neuro_synthesis", field: "Neuroscience · MIT", reputation: 920, title: "Ketone metabolism as neuroprotective mechanism: hypothesis for Alzheimer's targeting", body: "Exogenous ketone supplementation may act as neuroprotection via dual pathways: direct ATP generation bypassing glycolytic deficits, and NLRP3 inflammasome suppression.", tags: ["Neuroscience", "Longevity"], upvotes: 187, comments: 29, time: "5h ago", summary: null },
-  { id: "3", author: "vexy_analyst", field: "Bioinformatics · Broad Institute", reputation: 3200, title: "Validation methodology for AI-assisted protein folding predictions: proposed community standard", body: "Proposing a four-tier verification protocol: AlphaFold2 baseline, wet-lab MD simulation validation, community peer review with structured scoring, and on-chain attestation for verified predictions.", tags: ["AI", "Biotech"], upvotes: 456, comments: 83, time: "1d ago", summary: "Four-tier validation protocol for AI protein folding: AlphaFold2 comparison, MD simulation, peer review, and on-chain attestation." },
-  { id: "4", author: "genetics_mapper", field: "Genetics · Weizmann Institute", reputation: 650, title: "CRISPR-Cas9 efficiency improvements with modified guide RNA secondary structures", body: "Engineering secondary structures into guide RNAs improves Cas9 binding efficiency by 23% on average across 14 target sequences, reducing off-target activity significantly.", tags: ["Genetics", "Biotech"], upvotes: 94, comments: 16, time: "2d ago", summary: null },
+  { id: "1", author: "dr_chen_lab", field: "Longevity · Stanford", reputation: 1840, title: "TERT reactivation in somatic cells shows 40% lifespan extension in murine models", body: "Our team investigated controlled TERT reactivation as a longevity intervention. Results show a 40% median lifespan extension in C57BL/6 mice with no observable tumor formation at 18 months post-treatment.", tags: ["Longevity", "Genetics"], upvotes: 312, comments: 47, time: "2h ago", summary: "TERT reactivation extended median murine lifespan by 40% with no tumor formation, reduced p21 expression, and improved mitochondrial function.", casFlag: false },
+  { id: "2", author: "neuro_synthesis", field: "Neuroscience · MIT", reputation: 920, title: "Ketone metabolism as neuroprotective mechanism: hypothesis for Alzheimer's targeting", body: "Exogenous ketone supplementation may act as neuroprotection via dual pathways: direct ATP generation bypassing glycolytic deficits, and NLRP3 inflammasome suppression.", tags: ["Neuroscience", "Longevity"], upvotes: 187, comments: 29, time: "5h ago", summary: null, casFlag: false },
+  { id: "3", author: "vexy_analyst", field: "Bioinformatics · Broad Institute", reputation: 3200, title: "Validation methodology for AI-assisted protein folding predictions: proposed community standard", body: "Proposing a four-tier verification protocol: AlphaFold2 baseline, wet-lab MD simulation validation, community peer review with structured scoring, and on-chain attestation for verified predictions.", tags: ["AI", "Biotech"], upvotes: 456, comments: 83, time: "1d ago", summary: "Four-tier validation protocol for AI protein folding: AlphaFold2 comparison, MD simulation, peer review, and on-chain attestation.", casFlag: false },
+  { id: "4", author: "genetics_mapper", field: "Genetics · Weizmann Institute", reputation: 650, title: "CRISPR-Cas9 efficiency improvements with modified guide RNA secondary structures", body: "Engineering secondary structures into guide RNAs improves Cas9 binding efficiency by 23% on average across 14 target sequences, reducing off-target activity significantly. Reagent CAS: 9001-99-4.", tags: ["Genetics", "Biotech"], upvotes: 94, comments: 16, time: "2d ago", summary: null, casFlag: true },
 ];
 
 const AVATARS = ["linear-gradient(135deg,#5ccb5f,#2e8b57)", "linear-gradient(135deg,#78d96b,#5ccb5f)", "linear-gradient(135deg,#3b82f6,#1d4ed8)", "linear-gradient(135deg,#8b5cf6,#6d28d9)"];
@@ -58,6 +58,36 @@ function PostCard({ post, idx }: { post: typeof POSTS[0]; idx: number }) {
           <p style={{ fontSize: 13, color: "var(--ink-2)", lineHeight: 1.6 }}>{post.summary}</p>
         </motion.div>
       )}
+
+      {/* CAS Screening Alert */}
+      {post.casFlag && (
+        <div style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 10, padding: "10px 14px", marginBottom: 12, display: "flex", alignItems: "flex-start", gap: 10 }}>
+          <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#f59e0b", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}>
+            <span style={{ color: "#fff", fontSize: 10, fontWeight: 700 }}>!</span>
+          </div>
+          <div>
+            <p style={{ fontSize: 12.5, fontWeight: 600, color: "#d97706", marginBottom: 2 }}>Compliance Filter: CAS Screening Active</p>
+            <p style={{ fontSize: 12, color: "var(--muted)", lineHeight: 1.5 }}>This post references unregistered chemical compounds or biological agents. Data is unverified by WHO/FDA standards. Proceed with caution.</p>
+          </div>
+        </div>
+      )}
+
+      {/* Experience Log */}
+      <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "12px 14px", marginBottom: 16 }}>
+        <p style={{ fontSize: 11, fontWeight: 600, color: "var(--subtle)", letterSpacing: "0.05em", textTransform: "uppercase", marginBottom: 8 }}>Experience Log — Reproducibility</p>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "6px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--surface)", fontSize: 12.5, fontWeight: 500, color: "var(--ink)", cursor: "pointer", transition: "all 0.15s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green)"; (e.currentTarget as HTMLElement).style.color = "var(--green-3)"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--ink)"; }}>
+            Does it work <span className="badge badge-gray" style={{ fontSize: 10, padding: "2px 6px" }}>12</span>
+          </button>
+          <button style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, padding: "6px", borderRadius: 6, border: "1px solid var(--border)", background: "var(--surface)", fontSize: 12.5, fontWeight: 500, color: "var(--ink)", cursor: "pointer", transition: "all 0.15s" }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#ef4444"; (e.currentTarget as HTMLElement).style.color = "#dc2626"; }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.color = "var(--ink)"; }}>
+            Does not work <span className="badge badge-gray" style={{ fontSize: 10, padding: "2px 6px" }}>3</span>
+          </button>
+        </div>
+      </div>
 
       {/* Tags */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
