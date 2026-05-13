@@ -1,131 +1,88 @@
 "use client";
 
-import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Microscope, Globe, Code } from "lucide-react";
 
-const links = [
-  { label: "Scientific Feed", href: "/feed" },
+const LINKS = [
+  { label: "Platform", href: "/feed" },
+  { label: "About", href: "/about" },
   { label: "VEXY AI", href: "/vexy" },
-  { label: "Community Missions", href: "/missions" },
-  { label: "Reputation System", href: "/reputation" },
-  { label: "About LABVEX", href: "/about" },
-];
-
-const socials = [
-  { label: "Twitter / X", href: "https://x.com/labvex", icon: Globe },
-  { label: "GitHub", href: "https://github.com/labvex", icon: Code },
+  { label: "Missions", href: "/missions" },
+  { label: "Reputation", href: "/reputation" },
 ];
 
 export function LandingFooter() {
   return (
-    <footer className="border-t border-[var(--border-subtle)] bg-[var(--bg-graphite)]">
-      {/* CTA band */}
-      <div className="border-b border-[var(--border-subtle)] py-20 px-6">
-        <motion.div
-          className="max-w-3xl mx-auto text-center"
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <div className="badge badge-green mx-auto mb-5">Begin Your Journey</div>
-          <h2
-            className="text-4xl sm:text-5xl font-bold mb-5"
-            style={{ fontFamily: "var(--font-display)" }}
-          >
-            Join the DeSci Revolution
-          </h2>
-          <p className="text-[var(--text-secondary)] text-lg mb-10 max-w-xl mx-auto">
-            LABVEX is live. Connect your wallet, build your scientific identity,
-            and start contributing to the future of decentralized science.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/onboarding" className="btn-primary text-base px-8 py-3.5">
-              Enter Ecosystem
-              <ArrowRight size={16} />
-            </Link>
-            <Link href="/feed" className="btn-secondary text-base px-8 py-3.5">
-              Browse the Feed
-            </Link>
-          </div>
-        </motion.div>
-      </div>
-
-      {/* Footer links */}
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="flex flex-col md:flex-row items-start justify-between gap-10">
-          {/* Brand */}
-          <div className="max-w-xs">
-            <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-[var(--green-neon)] flex items-center justify-center">
-                <Microscope size={16} className="text-[#0d1117]" />
-              </div>
-              <span className="font-bold text-lg" style={{ fontFamily: "var(--font-display)" }}>
-                LABVEX
-              </span>
+    <footer
+      style={{
+        background: "var(--bg-primary)",
+        borderTop: "1px solid var(--border)",
+        padding: "3rem 1.5rem",
+      }}
+    >
+      <div
+        style={{
+          maxWidth: 1160,
+          margin: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: "2rem",
+        }}
+      >
+        {/* Top row */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+          {/* Logo */}
+          <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+            <div
+              style={{
+                width: 28, height: 28, borderRadius: 8,
+                background: "linear-gradient(135deg,#5ccb5f,#2e8b57)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+              }}
+            >
+              <span style={{ color: "#fff", fontSize: 13, fontWeight: 700, fontFamily: "var(--font-display)" }}>L</span>
             </div>
-            <p className="text-[13px] text-[var(--text-muted)] leading-relaxed">
-              The Unified DeSci Operating System. AI-native. Decentralized.
-              Scientific.
-            </p>
-            <p className="text-[12px] text-[var(--text-muted)] mt-3 italic">
-              "Don't trust papers. Verify data. Own discovery."
-            </p>
-          </div>
+            <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 16, color: "var(--text-primary)", letterSpacing: "-0.02em" }}>
+              LABVEX
+            </span>
+          </Link>
 
           {/* Nav */}
-          <div>
-            <p className="text-[11px] text-[var(--text-muted)] uppercase tracking-widest mb-4 font-medium">
-              Platform
-            </p>
-            <ul className="space-y-2.5">
-              {links.map((l) => (
-                <li key={l.href}>
-                  <Link
-                    href={l.href}
-                    className="text-[14px] text-[var(--text-secondary)] hover:text-[var(--green-neon)] transition-colors"
-                  >
-                    {l.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Socials */}
-          <div>
-            <p className="text-[11px] text-[var(--text-muted)] uppercase tracking-widest mb-4 font-medium">
-              Community
-            </p>
-            <ul className="space-y-2.5">
-              {socials.map((s) => {
-                const Icon = s.icon;
-                return (
-                  <li key={s.href}>
-                    <a
-                      href={s.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-[14px] text-[var(--text-secondary)] hover:text-[var(--green-neon)] transition-colors"
-                    >
-                      <Icon size={14} />
-                      {s.label}
-                    </a>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
+          <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.25rem 1.75rem" }}>
+            {LINKS.map((l) => (
+              <Link
+                key={l.label}
+                href={l.href}
+                style={{ fontSize: 13.5, color: "var(--text-muted)", textDecoration: "none", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
         </div>
 
-        <div className="mt-12 pt-6 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-[12px] text-[var(--text-muted)]">
-            © 2025 LABVEX. All rights reserved.
+        {/* Divider */}
+        <div style={{ height: 1, background: "var(--border)" }} />
+
+        {/* Bottom row */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <p style={{ fontSize: 12.5, color: "var(--text-muted)" }}>
+            © {new Date().getFullYear()} LABVEX. Building the open scientific stack.
           </p>
-          <p className="text-[12px] text-[var(--text-muted)]">
-            Built on Solana · Powered by AI · Made for Science
-          </p>
+          <div style={{ display: "flex", gap: "1.25rem" }}>
+            {["Privacy", "Terms"].map((t) => (
+              <Link
+                key={t}
+                href="#"
+                style={{ fontSize: 12.5, color: "var(--text-muted)", textDecoration: "none" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--text-primary)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--text-muted)")}
+              >
+                {t}
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </footer>
