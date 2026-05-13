@@ -13,7 +13,7 @@ import {
 const floatVariants = {
   animate: {
     y: [0, -12, 0],
-    transition: { duration: 6, repeat: Infinity, ease: "easeInOut" },
+    transition: { duration: 6, repeat: Infinity, ease: "easeInOut" as const },
   },
 };
 
