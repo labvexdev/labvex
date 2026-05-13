@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Microscope, Globe, Github } from "lucide-react";
+import { ArrowRight, Microscope, Globe, Code } from "lucide-react";
 
 const links = [
   { label: "Scientific Feed", href: "/feed" },
@@ -14,7 +14,7 @@ const links = [
 
 const socials = [
   { label: "Twitter / X", href: "https://x.com/labvex", icon: Globe },
-  { label: "GitHub", href: "https://github.com/labvex", icon: Github },
+  { label: "GitHub", href: "https://github.com/labvex", icon: Code },
 ];
 
 export function LandingFooter() {

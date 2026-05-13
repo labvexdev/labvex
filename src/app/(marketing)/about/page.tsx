@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Microscope, Dna, Brain, Globe, Zap, ArrowRight, Github, Shield, Cpu } from "lucide-react";
+import { Microscope, Dna, Brain, Globe, Zap, ArrowRight, Code, Shield, Cpu } from "lucide-react";
 import Link from "next/link";
 
 const ROADMAP = [
@@ -171,7 +171,7 @@ export default function AboutPage() {
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
               <Link href="/onboarding" className="btn-primary text-base px-8 py-3.5">Enter Ecosystem <ArrowRight size={16} /></Link>
               <a href="https://github.com/labvex" target="_blank" rel="noopener noreferrer" className="btn-secondary text-base px-8 py-3.5">
-                <Github size={16} />GitHub
+                <Code size={16} />GitHub
               </a>
             </div>
             <div className="flex items-center justify-center gap-5">
@@ -179,7 +179,7 @@ export default function AboutPage() {
                 <Globe size={15} />@labvex
               </a>
               <a href="https://github.com/labvex" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-[14px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors">
-                <Github size={15} />github.com/labvex
+                <Code size={15} />github.com/labvex
               </a>
             </div>
           </motion.div>
