@@ -44,9 +44,19 @@ function CircularGauge({ score }: { score: number }) {
 }
 
 export default function IdentityTerminal({ params }: { params: { username: string } }) {
-  const user = MOCK_USER;
-  const isOwnProfile = params.username === "me" || params.username === user.username;
+  const [user, setUser] = useState(MOCK_USER);
   const [decayDays, setDecayDays] = useState(547); // 18 months
+
+  useEffect(() => {
+    if (params.username === "me") {
+      const stored = localStorage.getItem("labvex_user");
+      if (stored) {
+        setUser(JSON.parse(stored));
+      }
+    }
+  }, [params.username]);
+
+  const isOwnProfile = params.username === "me" || params.username === user.username;
 
   return (
     <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>

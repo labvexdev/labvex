@@ -38,15 +38,32 @@ export default function OnboardingPage() {
 
   const connectWallet = async () => {
     await new Promise((r) => setTimeout(r, 900));
+    const mockAddress = "7xKX" + Math.random().toString(36).substring(2, 10).toUpperCase() + "..." + Math.random().toString(36).substring(2, 6).toUpperCase();
+    localStorage.setItem("labvex_wallet", mockAddress);
     setWalletConnected(true);
-    toast.success("Wallet connected!");
+    toast.success("Wallet connected: " + mockAddress.substring(0, 8) + "...");
     setTimeout(() => setStep(2), 600);
   };
 
   const handleFinish = () => {
     if (selectedInterests.length === 0) { toast.error("Select at least one interest"); return; }
+    
+    // Save profile data
+    const userData = {
+      username: username || "anonymous",
+      display_name: displayName || "New Researcher",
+      bio: bio || "Science enthusiast and LABVEX member.",
+      interests: selectedInterests,
+      wallet_address: localStorage.getItem("labvex_wallet") || "Not Connected",
+      reputation_score: 100, // Starting score
+      badges: ["Early Scientist"],
+      created_at: new Date().toISOString().split('T')[0],
+      stats: { posts: 0, comments: 0, upvotes_received: 0, missions_completed: 0 }
+    };
+    localStorage.setItem("labvex_user", JSON.stringify(userData));
+
     setStep(4);
-    setTimeout(() => router.push("/feed"), 2000);
+    setTimeout(() => router.push("/profile/me"), 2000);
   };
 
   return (

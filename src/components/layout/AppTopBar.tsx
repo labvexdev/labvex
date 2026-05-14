@@ -1,9 +1,18 @@
 "use client";
 
-import { Search, Bell, FlaskConical } from "lucide-react";
+import { Search, Bell, Wallet } from "lucide-react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { truncateAddress } from "@/lib/utils";
 
 export function AppTopBar() {
+  const [wallet, setWallet] = useState<string | null>(null);
+
+  useEffect(() => {
+    const w = localStorage.getItem("labvex_wallet");
+    if (w) setWallet(w);
+  }, []);
+
   return (
     <header className="topbar">
       <div style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, maxWidth: 340 }}>
@@ -18,8 +27,10 @@ export function AppTopBar() {
           onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
           onMouseLeave={e => (e.currentTarget.style.background = "var(--surface)")}
         >
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
-          <span className="font-mono" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Connect Wallet</span>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: wallet ? "var(--green)" : "var(--muted)" }} />
+          <span className="font-mono" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>
+            {wallet ? truncateAddress(wallet) : "Connect Wallet"}
+          </span>
         </button>
         <button style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <Bell size={14} style={{ color: "var(--muted)" }} />
