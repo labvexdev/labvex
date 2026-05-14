@@ -48,15 +48,16 @@ export default function IdentityTerminal({ params }: { params: { username: strin
   const [decayDays, setDecayDays] = useState(547); // 18 months
 
   useEffect(() => {
-    if (params.username === "me") {
-      const stored = localStorage.getItem("labvex_user");
-      if (stored) {
-        setUser(JSON.parse(stored));
+    const stored = localStorage.getItem("labvex_user");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (params.username === "me" || params.username === parsed.username) {
+        setUser(parsed);
       }
     }
   }, [params.username]);
 
-  const isOwnProfile = params.username === "me" || params.username === user.username;
+  const isOwnProfile = params.username === "me" || (user.username !== "genetics_mapper" && params.username === user.username);
 
   return (
     <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>

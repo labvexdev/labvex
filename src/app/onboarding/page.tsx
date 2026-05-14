@@ -64,7 +64,7 @@ export default function OnboardingPage() {
     localStorage.setItem("labvex_user", JSON.stringify(userData));
 
     setStep(4);
-    setTimeout(() => router.push("/profile/me"), 2000);
+    setTimeout(() => router.push(`/profile/${userData.username}`), 2000);
   };
 
   return (

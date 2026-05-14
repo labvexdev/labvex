@@ -8,10 +8,14 @@ import { connectSolanaWallet } from "@/lib/wallet";
 
 export function AppTopBar() {
   const [wallet, setWallet] = useState<string | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     const w = localStorage.getItem("labvex_wallet");
     if (w) setWallet(w);
+    
+    const u = localStorage.getItem("labvex_user");
+    if (u) setUser(JSON.parse(u));
   }, []);
 
   const handleConnect = async () => {
@@ -43,8 +47,8 @@ export function AppTopBar() {
         <button style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <Bell size={14} style={{ color: "var(--muted)" }} />
         </button>
-        <Link href="/profile/me" style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>S</span>
+        <Link href={user ? `/profile/${user.username}` : "/onboarding"} style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
+          <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>{user ? user.display_name[0].toUpperCase() : "S"}</span>
         </Link>
       </div>
     </header>
