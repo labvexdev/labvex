@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FlaskConical, Wallet, User, Tag, CheckCircle, ArrowRight, ChevronRight, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { connectSolanaWallet, connectBackpackWallet } from "@/lib/wallet";
 
 const INTERESTS = ["AI", "Biotech", "Longevity", "Neuroscience", "Genetics", "DeSci"];
 
@@ -118,12 +119,19 @@ export default function OnboardingPage() {
               
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                 {[
-                  { label: "Phantom Wallet", sub: "Most popular Solana wallet", color: "#ab9ff2" },
-                  { label: "Backpack", sub: "Multi-chain wallet by Coral", color: "#e15d3d" },
+                  { label: "Phantom Wallet", sub: "Most popular Solana wallet", color: "#ab9ff2", connect: connectSolanaWallet },
+                  { label: "Backpack", sub: "Multi-chain wallet by Coral", color: "#e15d3d", connect: connectBackpackWallet },
                 ].map((w) => (
                   <button
                     key={w.label}
-                    onClick={connectWallet}
+                    onClick={async () => {
+                      const addr = await w.connect();
+                      if (addr) {
+                        setWalletConnected(true);
+                        toast.success("Identity Verified: " + addr.substring(0, 8) + "...");
+                        setTimeout(() => setStep(2), 800);
+                      }
+                    }}
                     style={{ 
                       width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--surface)", transition: "all 0.2s", textAlign: "left" 
                     }}

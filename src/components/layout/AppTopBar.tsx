@@ -4,6 +4,7 @@ import { Search, Bell, Wallet } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { truncateAddress } from "@/lib/utils";
+import { connectSolanaWallet } from "@/lib/wallet";
 
 export function AppTopBar() {
   const [wallet, setWallet] = useState<string | null>(null);
@@ -12,6 +13,11 @@ export function AppTopBar() {
     const w = localStorage.getItem("labvex_wallet");
     if (w) setWallet(w);
   }, []);
+
+  const handleConnect = async () => {
+    const addr = await connectSolanaWallet();
+    if (addr) setWallet(addr);
+  };
 
   return (
     <header className="topbar">
@@ -23,7 +29,9 @@ export function AppTopBar() {
         />
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", transition: "background 0.15s" }}
+        <button 
+          onClick={handleConnect}
+          style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", transition: "background 0.15s" }}
           onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
           onMouseLeave={e => (e.currentTarget.style.background = "var(--surface)")}
         >
