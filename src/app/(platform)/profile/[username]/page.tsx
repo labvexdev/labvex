@@ -5,6 +5,7 @@ import { ShieldCheck, CalendarClock, Wallet, ExternalLink, Activity, Network, Tr
 import Link from "next/link";
 import { formatNumber, truncateAddress } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const MOCK_USER = {
   username: "genetics_mapper",
@@ -58,6 +59,19 @@ export default function IdentityTerminal({ params }: { params: { username: strin
   }, [params.username]);
 
   const isOwnProfile = params.username === "me" || (user.username !== "genetics_mapper" && params.username === user.username);
+
+  const [shareTitle, setShareTitle] = useState("");
+  const [shareLink, setShareLink] = useState("");
+  const [shareDesc, setShareDesc] = useState("");
+
+  const handleShare = () => {
+    if (!shareTitle || !shareLink) return toast.error("Title and Link are required.");
+    const existing = JSON.parse(localStorage.getItem("labvex_submissions") || "[]");
+    const newSub = { id: Date.now().toString(), author: user.username, title: shareTitle, link: shareLink, desc: shareDesc, status: "Pending", date: new Date().toISOString() };
+    localStorage.setItem("labvex_submissions", JSON.stringify([newSub, ...existing]));
+    toast.success("Content submitted for admin review.");
+    setShareTitle(""); setShareLink(""); setShareDesc("");
+  };
 
   return (
     <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>
@@ -183,6 +197,30 @@ export default function IdentityTerminal({ params }: { params: { username: strin
             </div>
           </div>
         </div>
+
+        {/* Content Submission Form */}
+        {isOwnProfile && (
+          <div className="card" style={{ padding: 32, marginTop: 24 }}>
+            <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>Share Your Work</h3>
+            <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 24 }}>Submit your published papers, validated datasets, or peer reviews to earn reputation.</p>
+            
+            <div style={{ display: "grid", gap: 16 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Title <span style={{ color: "var(--green-3)" }}>*</span></label>
+                <input value={shareTitle} onChange={e => setShareTitle(e.target.value)} placeholder="e.g. Epigenetic reprogramming review" style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Link / DOI <span style={{ color: "var(--green-3)" }}>*</span></label>
+                <input value={shareLink} onChange={e => setShareLink(e.target.value)} placeholder="https://..." style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }} />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Methodology / Notes</label>
+                <textarea value={shareDesc} onChange={e => setShareDesc(e.target.value)} placeholder="Brief summary of your methodology or findings..." rows={3} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none", resize: "none" }} />
+              </div>
+              <button onClick={handleShare} className="btn btn-dark" style={{ width: "fit-content", padding: "0.6rem 1.5rem" }}>Submit for Verification</button>
+            </div>
+          </div>
+        )}
 
       </motion.div>
     </div>

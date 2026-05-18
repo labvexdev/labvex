@@ -2,16 +2,17 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Target, Clock, Zap, Users, Check, ArrowRight, Filter } from "lucide-react";
+import { Target, Clock, Zap, Users, Check, ArrowRight, Filter, Plus, DollarSign } from "lucide-react";
 import Link from "next/link";
+import toast from "react-hot-toast";
 
 const MISSIONS = [
   { id: "1", title: "Summarise a Longevity Paper", desc: "Find a peer-reviewed longevity paper published in 2023–24 and write a structured LABVEX summary with methodology, findings, and limitations.", reward: 50, diff: "Easy", category: "Research", time: "~30 min", completions: 312, icon: "📄" },
   { id: "2", title: "Validate an AI Protein Prediction", desc: "Take an AlphaFold2 prediction from the community feed and compare it against available wet-lab data. Submit your validation report.", reward: 120, diff: "Medium", category: "Validation", time: "~2h", completions: 89, icon: "🧬" },
-  { id: "3", title: "Peer Review a DeSci Proposal", desc: "Review a community research proposal using LABVEX's structured peer review framework. Score methodology, feasibility, and impact.", reward: 180, diff: "Medium", category: "Peer Review", time: "~3h", completions: 54, icon: "🔬" },
+  { id: "3", title: "Peer Review a DeSci Proposal", desc: "Review a community research proposal using LABVEX's structured peer review framework. Score methodology, feasibility, and impact.", reward: 180, diff: "Medium", category: "Peer Review", time: "~3h", completions: 54, icon: "🔬", usdt: 150 },
   { id: "4", title: "Build a VEXY Research Thread", desc: "Create an in-depth research thread using VEXY AI to explore a frontier science topic. Minimum 5 connected posts with citations.", reward: 300, diff: "Hard", category: "Research", time: "~5h", completions: 21, icon: "🧠" },
   { id: "5", title: "Onboard a Researcher", desc: "Invite and onboard a practicing scientist to LABVEX. Help them complete their profile and post their first research thread.", reward: 75, diff: "Easy", category: "Community", time: "~1h", completions: 445, icon: "👥" },
-  { id: "6", title: "Reproduce a Published Study", desc: "Select a recent study and attempt computational reproduction using available datasets. Document your process and findings.", reward: 500, diff: "Expert", category: "Validation", time: "~20h", completions: 8, icon: "⚗️" },
+  { id: "6", title: "Reproduce a Published Study", desc: "Select a recent study and attempt computational reproduction using available datasets. Document your process and findings.", reward: 500, diff: "Expert", category: "Validation", time: "~20h", completions: 8, icon: "⚗️", usdt: 1000 },
 ];
 
 const DIFF_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -26,16 +27,67 @@ const CATS = ["All", "Research", "Validation", "Peer Review", "Community"];
 export default function MissionsPage() {
   const [cat, setCat] = useState("All");
   const [completed, setCompleted] = useState<string[]>([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [newMissionTitle, setNewMissionTitle] = useState("");
+  const [newMissionDesc, setNewMissionDesc] = useState("");
+  const [rewardType, setRewardType] = useState("rep");
+  const [usdtAmount, setUsdtAmount] = useState("");
+
+  const handleCreateMission = () => {
+    if (!newMissionTitle || !newMissionDesc) return toast.error("Title and description are required.");
+    if (rewardType === "usdt" && !usdtAmount) return toast.error("USDT amount is required.");
+    
+    toast.success("Mission created and funded successfully!");
+    setIsCreating(false);
+    setNewMissionTitle("");
+    setNewMissionDesc("");
+    setUsdtAmount("");
+  };
 
   const filtered = cat === "All" ? MISSIONS : MISSIONS.filter(m => m.category === cat);
 
   return (
     <div style={{ padding: "28px 28px 48px", maxWidth: 1060, margin: "0 auto" }}>
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 22, color: "var(--ink)", letterSpacing: "-0.02em", marginBottom: 4 }}>Community Missions</h1>
-        <p style={{ fontSize: 13.5, color: "var(--muted)" }}>Complete missions to earn reputation and contribute to the scientific ecosystem.</p>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <div>
+          <h1 style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 22, color: "var(--ink)", letterSpacing: "-0.02em", marginBottom: 4 }}>Community Missions</h1>
+          <p style={{ fontSize: 13.5, color: "var(--muted)" }}>Complete missions to earn reputation and contribute to the scientific ecosystem.</p>
+        </div>
+        <button onClick={() => setIsCreating(true)} className="btn btn-dark" style={{ display: "flex", alignItems: "center", gap: 6 }}>
+          <Plus size={16} /> Create Mission
+        </button>
       </div>
+
+      {isCreating && (
+        <div className="card" style={{ padding: 24, marginBottom: 32, border: "1px solid var(--green)" }}>
+          <h2 style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)", marginBottom: 16 }}>Fund a New Mission</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <input value={newMissionTitle} onChange={e => setNewMissionTitle(e.target.value)} placeholder="Mission Title" style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }} />
+            <textarea value={newMissionDesc} onChange={e => setNewMissionDesc(e.target.value)} placeholder="Describe the task required..." rows={3} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none", resize: "none" }} />
+            
+            <div style={{ background: "var(--surface-2)", padding: 16, borderRadius: 8, border: "1px solid var(--border)" }}>
+              <p style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Reward Structure</p>
+              <div style={{ display: "flex", gap: 12, marginBottom: 12 }}>
+                <button onClick={() => setRewardType("rep")} className={rewardType === "rep" ? "btn btn-dark" : "btn btn-outline"} style={{ flex: 1, fontSize: 13 }}>Reputation Only</button>
+                <button onClick={() => setRewardType("usdt")} className={rewardType === "usdt" ? "btn btn-dark" : "btn btn-outline"} style={{ flex: 1, fontSize: 13, display: "flex", alignItems: "center", gap: 6 }}><DollarSign size={14}/> USDT + Reputation</button>
+              </div>
+              
+              {rewardType === "usdt" && (
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 13 }}>USDT Amount:</span>
+                  <input type="number" value={usdtAmount} onChange={e => setUsdtAmount(e.target.value)} placeholder="50" style={{ width: 100, padding: "8px 12px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface)", fontSize: 14, outline: "none" }} />
+                </div>
+              )}
+            </div>
+            
+            <div style={{ display: "flex", gap: 12, justifyContent: "flex-end" }}>
+              <button onClick={() => setIsCreating(false)} className="btn btn-outline">Cancel</button>
+              <button onClick={handleCreateMission} className="btn btn-dark" style={{ background: "var(--green-3)", borderColor: "var(--green-3)" }}>Publish & Fund</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Stats bar */}
       <div style={{ display: "flex", gap: 16, marginBottom: 28, flexWrap: "wrap" }}>
@@ -86,10 +138,19 @@ export default function MissionsPage() {
                 <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12.5, color: "var(--muted)" }}>
                   <Users size={12} />{m.completions} done
                 </div>
-                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 4 }}>
-                  <Zap size={12} style={{ color: "var(--green-3)" }} />
-                  <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--green-3)" }}>+{m.reward}</span>
-                  <span style={{ fontSize: 11.5, color: "var(--muted)" }}>rep</span>
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
+                  {m.usdt && (
+                    <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                      <DollarSign size={12} style={{ color: "#10b981" }} />
+                      <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: "#10b981" }}>{m.usdt}</span>
+                      <span style={{ fontSize: 11.5, color: "var(--muted)" }}>USDT</span>
+                    </div>
+                  )}
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <Zap size={12} style={{ color: "var(--green-3)" }} />
+                    <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 15, color: "var(--green-3)" }}>+{m.reward}</span>
+                    <span style={{ fontSize: 11.5, color: "var(--muted)" }}>rep</span>
+                  </div>
                 </div>
               </div>
 

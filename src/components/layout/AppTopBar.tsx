@@ -1,6 +1,6 @@
 "use client";
 
-import { Search, Bell, Wallet } from "lucide-react";
+import { Search, Bell } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { truncateAddress } from "@/lib/utils";
@@ -13,7 +13,6 @@ export function AppTopBar() {
   useEffect(() => {
     const w = localStorage.getItem("labvex_wallet");
     if (w) setWallet(w);
-    
     const u = localStorage.getItem("labvex_user");
     if (u) setUser(JSON.parse(u));
   }, []);
@@ -32,8 +31,15 @@ export function AppTopBar() {
           style={{ background: "transparent", border: "none", outline: "none", fontSize: 13.5, color: "var(--ink)", width: "100%", fontFamily: "inherit" }}
         />
       </div>
+
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <button 
+        {/* Devnet badge */}
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 99, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)" }}>
+          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#8b5cf6" }} />
+          <span style={{ fontSize: 11, fontWeight: 600, color: "#7c3aed", letterSpacing: "0.04em" }}>DEVNET</span>
+        </div>
+
+        <button
           onClick={handleConnect}
           style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", transition: "background 0.15s" }}
           onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
@@ -44,9 +50,11 @@ export function AppTopBar() {
             {wallet ? truncateAddress(wallet) : "Connect Wallet"}
           </span>
         </button>
+
         <button style={{ width: 32, height: 32, borderRadius: "50%", background: "var(--surface-2)", border: "1px solid var(--border)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <Bell size={14} style={{ color: "var(--muted)" }} />
         </button>
+
         <Link href={user ? `/profile/${user.username}` : "/onboarding"} style={{ width: 32, height: 32, borderRadius: "50%", background: "linear-gradient(135deg,#5ccb5f,#2e8b57)", display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none" }}>
           <span style={{ color: "#fff", fontSize: 12, fontWeight: 700 }}>{user ? user.display_name[0].toUpperCase() : "S"}</span>
         </Link>

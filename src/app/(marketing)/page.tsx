@@ -2,7 +2,8 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowRight, Sparkles, FlaskConical, Network, Award, Rss, ChevronRight, Check } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, Sparkles, FlaskConical, Network, Award, Rss, ChevronRight, Check, Shield, Users, Zap } from "lucide-react";
 
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 20 },
@@ -30,14 +31,12 @@ function Nav() {
           ))}
         </nav>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <button style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface)", cursor: "pointer", transition: "background 0.15s" }}
-            onMouseEnter={e => (e.currentTarget.style.background = "var(--surface-2)")}
-            onMouseLeave={e => (e.currentTarget.style.background = "var(--surface)")}
-          >
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "var(--green)" }} />
-            <span className="font-mono" style={{ fontSize: 13, fontWeight: 500, color: "var(--ink)" }}>Connect Wallet</span>
-          </button>
-          <Link href="/feed" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Launch App <ArrowRight size={14}/></Link>
+          {/* Devnet badge */}
+          <div style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 10px", borderRadius:99, background:"rgba(139,92,246,0.08)", border:"1px solid rgba(139,92,246,0.25)" }}>
+            <div style={{ width:6, height:6, borderRadius:"50%", background:"#8b5cf6" }} />
+            <span style={{ fontSize:11, fontWeight:600, color:"#7c3aed", letterSpacing:"0.04em" }}>DEVNET</span>
+          </div>
+          <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Launch App <ArrowRight size={14}/></Link>
         </div>
       </div>
     </header>
@@ -47,101 +46,66 @@ function Nav() {
 /* ── HERO ────────────────────────────────────────────────────── */
 function Hero() {
   return (
-    <section style={{ paddingTop:160, paddingBottom:96, position:"relative", overflow:"hidden" }}>
-      {/* bg blobs */}
-      <div style={{ position:"absolute", inset:0, pointerEvents:"none", background:"radial-gradient(ellipse 80% 50% at 50% -10%, rgba(92,203,95,0.08) 0%, transparent 60%)" }}/>
-      <div style={{ position:"absolute", width:600, height:600, borderRadius:"50%", border:"1px solid rgba(92,203,95,0.07)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none" }}/>
+    <section style={{ paddingTop:140, paddingBottom:80, position:"relative", overflow:"hidden" }}>
+      <div style={{ position:"absolute", inset:0, pointerEvents:"none", background:"radial-gradient(ellipse 80% 50% at 50% -10%, rgba(92,203,95,0.08) 0%, transparent 60%)"}}/>
+      <div style={{ position:"absolute", width:600, height:600, borderRadius:"50%", border:"1px solid rgba(92,203,95,0.07)", top:"50%", left:"50%", transform:"translate(-50%,-50%)", pointerEvents:"none"}}/>
 
-      <div className="wrap-xs" style={{ textAlign:"center" }}>
-        <motion.div {...fade(0)}>
-          <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(92,203,95,0.08)", border:"1px solid rgba(92,203,95,0.18)", borderRadius:99, padding:"6px 14px 6px 8px", marginBottom:32 }}>
-            <span style={{ background:"var(--green)", borderRadius:99, padding:"2px 10px", fontSize:11, fontWeight:600, color:"#fff", letterSpacing:"0.04em", textTransform:"uppercase" }}>New</span>
-            <span style={{ fontSize:13, color:"var(--green-3)", fontWeight:500 }}>VEXY AI Research Co-pilot is live</span>
-            <ChevronRight size={13} style={{ color:"var(--green-3)" }}/>
-          </div>
-        </motion.div>
+      <div className="wrap">
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center" }}>
+          {/* Left: Text */}
+          <div>
+            <motion.div {...fade(0)}>
+              <div style={{ display:"inline-flex", alignItems:"center", gap:8, background:"rgba(92,203,95,0.08)", border:"1px solid rgba(92,203,95,0.18)", borderRadius:99, padding:"6px 14px 6px 8px", marginBottom:32 }}>
+                <span style={{ background:"var(--green)", borderRadius:99, padding:"2px 10px", fontSize:11, fontWeight:600, color:"#fff", letterSpacing:"0.04em", textTransform:"uppercase" }}>New</span>
+                <span style={{ fontSize:13, color:"var(--green-3)", fontWeight:500 }}>VEXY AI Research Co-pilot is live</span>
+                <ChevronRight size={13} style={{ color:"var(--green-3)" }}/>
+              </div>
+            </motion.div>
 
-        <motion.h1 className="t-hero text-balance" style={{ marginBottom:24 }} {...fade(0.05)}>
-          Verify Data.<br/><span className="t-green">Own the Discovery.</span>
-        </motion.h1>
+            <motion.h1 className="t-hero text-balance" style={{ marginBottom:24, fontSize:"clamp(2.4rem,4.5vw,3.8rem)", textAlign:"left" }} {...fade(0.05)}>
+              Verify Data.<br/><span className="t-green">Own the Discovery.</span>
+            </motion.h1>
 
-        <motion.p className="t-lead text-balance" style={{ maxWidth:480, margin:"0 auto 40px" }} {...fade(0.1)}>
-          AI-native infrastructure for scientific collaboration, research verification, and biotech innovation — built on Solana.
-        </motion.p>
+            <motion.p className="t-lead" style={{ maxWidth:460, marginBottom:40, textAlign:"left" }} {...fade(0.1)}>
+              AI-native infrastructure for scientific collaboration, research verification, and biotech innovation — built on Solana Devnet.
+            </motion.p>
 
-        <motion.div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }} {...fade(0.15)}>
-          <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:15, padding:"0.8rem 1.75rem" }}>Start for free <ArrowRight size={15}/></Link>
-          <Link href="/vexy" className="btn btn-outline" style={{ fontSize:15, padding:"0.8rem 1.75rem" }}><Sparkles size={15} style={{ color:"var(--green)" }}/> Try VEXY AI</Link>
-        </motion.div>
+            <motion.div style={{ display:"flex", gap:12, flexWrap:"wrap" }} {...fade(0.15)}>
+              <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:15, padding:"0.8rem 1.75rem" }}>Start for free <ArrowRight size={15}/></Link>
+              <Link href="/vexy" className="btn btn-outline" style={{ fontSize:15, padding:"0.8rem 1.75rem" }}><Sparkles size={15} style={{ color:"var(--green)" }}/> Try VEXY AI</Link>
+            </motion.div>
 
-        {/* Live Ecosystem Pulse */}
-        <motion.div style={{ marginTop:56, display:"flex", alignItems:"center", justifyContent:"center", gap:48, flexWrap:"wrap" }} {...fade(0.2)}>
-          {[
-            ["Active Researches", "1,204"],
-            ["Total IP Value", "$14.2M"],
-            ["Verified PhDs", "842"]
-          ].map(([l,v])=>(
-            <div key={l} style={{ textAlign:"center" }}>
-              <div className="font-mono" style={{ fontWeight:700, fontSize:22, color:"var(--ink)" }}>{v}</div>
-              <div style={{ fontSize:12, color:"var(--subtle)", marginTop:4, textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 600 }}>{l}</div>
-            </div>
-          ))}
-        </motion.div>
-      </div>
-
-      {/* Platform UI mockup */}
-      <motion.div className="wrap" style={{ marginTop:72 }} {...fade(0.25)}>
-        <div style={{ background:"var(--surface)", border:"1px solid var(--border-2)", borderRadius:16, boxShadow:"0 24px 64px rgba(0,0,0,0.10), 0 0 0 1px rgba(0,0,0,0.04)", overflow:"hidden" }}>
-          {/* Window chrome */}
-          <div style={{ height:44, borderBottom:"1px solid var(--border)", background:"var(--surface-2)", display:"flex", alignItems:"center", padding:"0 16px", gap:8 }}>
-            {["#ef4444","#f59e0b","#22c55e"].map(c=><div key={c} style={{ width:12, height:12, borderRadius:"50%", background:c, opacity:0.8 }}/>)}
-            <div style={{ flex:1, height:24, background:"var(--surface-3)", borderRadius:6, margin:"0 12px", border:"1px solid var(--border)" }}/>
-          </div>
-          {/* Content preview */}
-          <div style={{ display:"grid", gridTemplateColumns:"200px 1fr", minHeight:320 }}>
-            {/* Sidebar */}
-            <div style={{ borderRight:"1px solid var(--border)", padding:"16px 12px", background:"var(--surface)" }}>
-              {[["🔬","Scientific Feed",true],["🧠","VEXY AI",false],["🎯","Missions",false],["⭐","Reputation",false]].map(([icon,label,active])=>(
-                <div key={label as string} style={{ display:"flex", alignItems:"center", gap:8, padding:"7px 10px", borderRadius:8, marginBottom:2, background:active?"var(--surface-3)":"transparent", cursor:"pointer" }}>
-                  <span style={{ fontSize:14 }}>{icon as string}</span>
-                  <span style={{ fontSize:13, fontWeight:active?600:400, color:active?"var(--ink)":"var(--muted)" }}>{label as string}</span>
+            <motion.div style={{ marginTop:48, display:"flex", alignItems:"center", gap:40, flexWrap:"wrap" }} {...fade(0.2)}>
+              {[["Active Researches","1,204"],["Total IP Value","$14.2M"],["Verified PhDs","842"]].map(([l,v])=>(
+                <div key={l} style={{ textAlign:"left" }}>
+                  <div className="font-mono" style={{ fontWeight:700, fontSize:22, color:"var(--ink)" }}>{v}</div>
+                  <div style={{ fontSize:11, color:"var(--subtle)", marginTop:4, textTransform:"uppercase", letterSpacing:"0.05em", fontWeight:600 }}>{l}</div>
                 </div>
               ))}
-            </div>
-            {/* Feed preview */}
-            <div style={{ padding:20, display:"flex", flexDirection:"column", gap:12 }}>
-              {[
-                { author:"Dr. Elena Vasquez", field:"Longevity · Stanford", title:"Epigenetic reprogramming extends healthspan in aged murine models", tag:"Longevity", upvotes:142 },
-                { author:"Prof. Marcus Chen", field:"Neuroscience · MIT", title:"CRISPR base editing corrects APOE4 variant in post-mitotic neurons", tag:"Genetics", upvotes:89 },
-              ].map((p,i)=>(
-                <div key={i} style={{ border:"1px solid var(--border)", borderRadius:12, padding:"14px 16px", background:"var(--surface)" }}>
-                  <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:8 }}>
-                    <div style={{ width:28, height:28, borderRadius:"50%", background:`linear-gradient(135deg,${i===0?"#5ccb5f,#2e8b57":"#78d96b,#5ccb5f"})`, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
-                      <span style={{ color:"#fff", fontSize:11, fontWeight:700 }}>{p.author[4]}</span>
-                    </div>
-                    <div>
-                      <div style={{ fontSize:12, fontWeight:600, color:"var(--ink)" }}>{p.author}</div>
-                      <div style={{ fontSize:11, color:"var(--subtle)" }}>{p.field}</div>
-                    </div>
-                    <div style={{ marginLeft:"auto" }} className="badge badge-green">{p.tag}</div>
-                  </div>
-                  <p style={{ fontSize:13, fontWeight:500, color:"var(--ink)", lineHeight:1.4 }}>{p.title}</p>
-                  <div style={{ display:"flex", gap:16, marginTop:10, paddingTop:8, borderTop:"1px solid var(--border)" }}>
-                    <span style={{ fontSize:11, color:"var(--subtle)" }}>↑ {p.upvotes}</span>
-                    <span style={{ fontSize:11, color:"var(--green-3)", fontWeight:500, cursor:"pointer" }}>AI Summary</span>
-                    <span style={{ fontSize:11, color:"var(--subtle)", cursor:"pointer" }}>Cite</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            </motion.div>
           </div>
+
+          {/* Right: Generated image */}
+          <motion.div {...fade(0.15)} style={{ position:"relative", display:"flex", justifyContent:"center" }}>
+            <div style={{ position:"relative", width:"100%", maxWidth:520, aspectRatio:"1/1" }}>
+              {/* Glow behind image */}
+              <div style={{ position:"absolute", inset:"10%", borderRadius:"50%", background:"radial-gradient(ellipse at center, rgba(92,203,95,0.12) 0%, transparent 70%)", pointerEvents:"none" }} />
+              <Image
+                src="/hero-network.png"
+                alt="LABVEX scientific network"
+                fill
+                style={{ objectFit:"contain" }}
+                priority
+              />
+            </div>
+          </motion.div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
 
-/* ── LOGOS / TRUST BAR ───────────────────────────────────────── */
+/* ── TRUST BAR ───────────────────────────────────────────────── */
 function TrustBar() {
   const items = ["Solana Foundation","OpenAI","Supabase","Helius RPC","Vercel Edge"];
   return (
@@ -200,6 +164,47 @@ function Features() {
   );
 }
 
+/* ── HOW IT WORKS ─────────────────────────────────────────────── */
+function HowItWorks() {
+  const steps = [
+    { num:"01", icon:Shield, title:"Connect & Verify", desc:"Link your Solana wallet or sign in with Google. Complete a ZK-verified identity check to receive your on-chain Scientific Passport." },
+    { num:"02", icon:Sparkles, title:"Research & Collaborate", desc:"Access the curated Scientific Feed, leverage VEXY AI for deep research, and connect with verified scientists across disciplines." },
+    { num:"03", icon:Award, title:"Contribute & Earn", desc:"Submit peer reviews, complete community missions, and publish findings. Earn verifiable on-chain reputation that compounds over time." },
+    { num:"04", icon:Users, title:"Build the Open Stack", desc:"Co-create the decentralised future of science. Your reputation, IP, and contributions remain permanently yours — not a platform's." },
+  ];
+  return (
+    <section className="section section-alt">
+      <div className="wrap">
+        <motion.div style={{ textAlign:"center", marginBottom:64 }} {...fade()}>
+          <div className="badge badge-green" style={{ marginBottom:20 }}>Protocol</div>
+          <h2 className="t-h2 text-balance" style={{ marginBottom:16 }}>
+            How LABVEX works
+          </h2>
+          <p className="t-lead" style={{ maxWidth:480, margin:"0 auto" }}>
+            From onboarding to on-chain reputation — four steps to becoming a verified scientist on the open scientific stack.
+          </p>
+        </motion.div>
+
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(240px, 1fr))", gap:24 }}>
+          {steps.map((s, i) => {
+            const Icon = s.icon;
+            return (
+              <motion.div key={s.num} className="card" style={{ padding:28, position:"relative", overflow:"hidden" }} {...fade(i * 0.08)}>
+                <div style={{ position:"absolute", top:16, right:16, fontFamily:"'JetBrains Mono',monospace", fontSize:40, fontWeight:800, color:"rgba(92,203,95,0.07)", lineHeight:1 }}>{s.num}</div>
+                <div style={{ width:44, height:44, borderRadius:12, background:"rgba(92,203,95,0.08)", border:"1px solid rgba(92,203,95,0.15)", display:"flex", alignItems:"center", justifyContent:"center", marginBottom:20 }}>
+                  <Icon size={20} style={{ color:"var(--green-3)" }} />
+                </div>
+                <h3 style={{ fontSize:16, fontWeight:600, color:"var(--ink)", marginBottom:10, fontFamily:"'Space Grotesk',sans-serif" }}>{s.title}</h3>
+                <p style={{ fontSize:13.5, color:"var(--muted)", lineHeight:1.65 }}>{s.desc}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── VEXY SECTION ────────────────────────────────────────────── */
 function VexySection() {
   const msgs = [
@@ -207,9 +212,9 @@ function VexySection() {
     { role:"ai", text:"Recent studies (Ocampo 2016 → Fahy 2024) show cyclic OSK expression restores youthful methylation patterns in aged cells. Key findings include:\n• 30–50% reversal of epigenetic age in vitro\n• Preserved cell identity — no dedifferentiation observed\n• In vivo extension of healthspan in murine models by ~25%", partial:true },
   ];
   return (
-    <section className="section section-alt">
+    <section className="section">
       <div className="wrap">
-        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center" }} className="lg:grid-cols-2">
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center" }}>
           {/* Chat UI */}
           <motion.div {...fade()}>
             <div className="card" style={{ overflow:"hidden", boxShadow:"var(--shadow-lg)" }}>
@@ -241,14 +246,14 @@ function VexySection() {
             </div>
           </motion.div>
 
-          {/* Copy */}
+          {/* Copy + sphere image */}
           <motion.div {...fade(0.1)}>
             <div className="badge badge-green" style={{ marginBottom:20 }}><Sparkles size={11}/>VEXY AI</div>
             <h2 className="t-h2 text-balance" style={{ marginBottom:20 }}>Your research,<br/><span className="t-green">amplified.</span></h2>
             <p className="t-lead" style={{ maxWidth:420, marginBottom:32 }}>
               VEXY is built exclusively for science. It understands domain terminology, evaluates methodology, and connects findings across disciplines.
             </p>
-            <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:36 }}>
+            <div style={{ display:"flex", flexDirection:"column", gap:12, marginBottom:32 }}>
               {["Paper summarisation in under 5 seconds","Hypothesis generation from raw datasets","Cross-domain research connection mapping","Peer review methodology critique"].map(f=>(
                 <div key={f} style={{ display:"flex", alignItems:"center", gap:10 }}>
                   <div style={{ width:20, height:20, borderRadius:6, background:"rgba(92,203,95,0.1)", border:"1px solid rgba(92,203,95,0.2)", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
@@ -257,6 +262,10 @@ function VexySection() {
                   <span style={{ fontSize:14.5, color:"var(--ink-2)" }}>{f}</span>
                 </div>
               ))}
+            </div>
+            {/* Sphere image */}
+            <div style={{ position:"relative", width:"100%", height:200, marginBottom:32 }}>
+              <Image src="/vexy-sphere.png" alt="LABVEX molecular sphere" fill style={{ objectFit:"contain", objectPosition:"left" }} />
             </div>
             <Link href="/vexy" className="btn btn-dark" style={{ fontSize:15 }}>Try VEXY free <ArrowRight size={15}/></Link>
           </motion.div>
@@ -273,7 +282,7 @@ function CTA() {
       <motion.div className="wrap-xs" {...fade()}>
         <div className="badge badge-green" style={{ marginBottom:24 }}>
           <span style={{ width:6,height:6,borderRadius:"50%",background:"var(--green)",display:"inline-block" }}/>
-          Now in early access
+          Now live on Solana Devnet
         </div>
         <h2 className="t-h2 text-balance" style={{ marginBottom:20, fontSize:"clamp(2.2rem,4vw,3.2rem)" }}>
           Build the future of science.<br/><span className="t-green">Start today.</span>
@@ -281,9 +290,14 @@ function CTA() {
         <p className="t-lead text-balance" style={{ maxWidth:440, margin:"0 auto 40px" }}>
           Join thousands of researchers on the open scientific stack. No paywalls. No gatekeepers. Just science.
         </p>
-        <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:16, padding:"0.9rem 2.25rem" }}>
-          Enter the Ecosystem <ArrowRight size={16}/>
-        </Link>
+        <div style={{ display:"flex", gap:12, justifyContent:"center", flexWrap:"wrap" }}>
+          <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:16, padding:"0.9rem 2.25rem" }}>
+            Enter the Ecosystem <ArrowRight size={16}/>
+          </Link>
+          <Link href="/forum" className="btn btn-outline" style={{ fontSize:16, padding:"0.9rem 2.25rem" }}>
+            <Users size={16} /> Join Community
+          </Link>
+        </div>
       </motion.div>
     </section>
   );
@@ -295,12 +309,19 @@ function Footer() {
     <footer style={{ borderTop:"1px solid var(--border)", background:"var(--surface)", padding:"40px 0" }}>
       <div className="wrap" style={{ display:"flex", flexDirection:"column", gap:24 }}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", flexWrap:"wrap", gap:16 }}>
-          <Link href="/" style={{ display:"flex", alignItems:"center", gap:10 }}>
-            <div style={{ width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#5ccb5f,#2e8b57)",display:"flex",alignItems:"center",justifyContent:"center" }}>
-              <FlaskConical size={14} color="#fff"/>
+          <div style={{ display:"flex", alignItems:"center", gap:16 }}>
+            <Link href="/" style={{ display:"flex", alignItems:"center", gap:10 }}>
+              <div style={{ width:28,height:28,borderRadius:8,background:"linear-gradient(135deg,#5ccb5f,#2e8b57)",display:"flex",alignItems:"center",justifyContent:"center" }}>
+                <FlaskConical size={14} color="#fff"/>
+              </div>
+              <span style={{ fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16,letterSpacing:"-0.02em",color:"var(--ink)" }}>LABVEX</span>
+            </Link>
+            {/* Devnet badge in footer */}
+            <div style={{ display:"flex", alignItems:"center", gap:5, padding:"3px 8px", borderRadius:99, background:"rgba(139,92,246,0.08)", border:"1px solid rgba(139,92,246,0.2)" }}>
+              <div style={{ width:5,height:5,borderRadius:"50%",background:"#8b5cf6" }} />
+              <span style={{ fontSize:10, fontWeight:600, color:"#7c3aed", letterSpacing:"0.04em" }}>SOLANA DEVNET</span>
             </div>
-            <span style={{ fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16,letterSpacing:"-0.02em",color:"var(--ink)" }}>LABVEX</span>
-          </Link>
+          </div>
           <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
             {[["Feed","/feed"],["VEXY AI","/vexy"],["Missions","/missions"],["Reputation","/reputation"],["Forum","/forum"],["About","/about"]].map(([l,h])=>(
               <Link key={l} href={h} style={{ fontSize:13.5,color:"var(--muted)",transition:"color 0.15s" }}
@@ -345,6 +366,7 @@ export default function HomePage() {
         <Hero/>
         <TrustBar/>
         <Features/>
+        <HowItWorks/>
         <VexySection/>
         <CTA/>
       </main>
