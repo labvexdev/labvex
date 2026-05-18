@@ -24,8 +24,8 @@ function Nav() {
           <span style={{ fontFamily:"'Space Grotesk',sans-serif", fontWeight:700, fontSize:17, letterSpacing:"-0.02em", color:"var(--ink)" }}>LABVEX</span>
         </Link>
         <nav style={{ display:"flex", alignItems:"center", gap:32 }} className="hidden md:flex">
-          {["Platform","About","Docs","Forum"].map(l => (
-            <Link key={l} href={l==="Platform"?"/feed":l==="About"?"/about":l==="Forum"?"/forum":"/docs"} className="t-sm" style={{ color:"var(--muted)", fontSize:14, fontWeight:500, transition:"color 0.15s" }}
+          {["About","Docs","Forum"].map(l => (
+            <Link key={l} href={l==="About"?"/about":l==="Forum"?"/forum":"/docs"} className="t-sm" style={{ color:"var(--muted)", fontSize:14, fontWeight:500, transition:"color 0.15s" }}
               onMouseEnter={e=>(e.currentTarget.style.color="var(--ink)")}
               onMouseLeave={e=>(e.currentTarget.style.color="var(--muted)")}>{l}</Link>
           ))}
@@ -36,6 +36,7 @@ function Nav() {
             <div style={{ width:6, height:6, borderRadius:"50%", background:"#8b5cf6" }} />
             <span style={{ fontSize:11, fontWeight:600, color:"#7c3aed", letterSpacing:"0.04em" }}>DEVNET</span>
           </div>
+          <Link href="/onboarding" className="btn btn-outline" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Log in</Link>
           <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Launch App <ArrowRight size={14}/></Link>
         </div>
       </div>

@@ -46,31 +46,51 @@ function CircularGauge({ score }: { score: number }) {
 
 export default function IdentityTerminal({ params }: { params: { username: string } }) {
   const [user, setUser] = useState(MOCK_USER);
-  const [decayDays, setDecayDays] = useState(547); // 18 months
+  const [loggedInUsername, setLoggedInUsername] = useState<string | null>(null);
+  const [decayDays, setDecayDays] = useState(547);
 
   useEffect(() => {
     const stored = localStorage.getItem("labvex_user");
     if (stored) {
       const parsed = JSON.parse(stored);
+      setLoggedInUsername(parsed.username);
+      // Show the logged-in user's data when viewing /profile/me or their own username
       if (params.username === "me" || params.username === parsed.username) {
         setUser(parsed);
       }
     }
   }, [params.username]);
 
-  const isOwnProfile = params.username === "me" || (user.username !== "genetics_mapper" && params.username === user.username);
+  // isOwnProfile: viewing /profile/me OR the URL username matches logged-in user
+  const isOwnProfile = params.username === "me" || params.username === loggedInUsername;
 
   const [shareTitle, setShareTitle] = useState("");
-  const [shareLink, setShareLink] = useState("");
+  const [shareXLink, setShareXLink] = useState("");
+  const [shareYoutubeLink, setShareYoutubeLink] = useState("");
+  const [shareOtherLink, setShareOtherLink] = useState("");
   const [shareDesc, setShareDesc] = useState("");
+  const [shareCategory, setShareCategory] = useState("Research");
 
   const handleShare = () => {
-    if (!shareTitle || !shareLink) return toast.error("Title and Link are required.");
+    if (!shareTitle) return toast.error("Title is required.");
+    if (!shareXLink && !shareYoutubeLink && !shareOtherLink) return toast.error("Please add at least one link.");
     const existing = JSON.parse(localStorage.getItem("labvex_submissions") || "[]");
-    const newSub = { id: Date.now().toString(), author: user.username, title: shareTitle, link: shareLink, desc: shareDesc, status: "Pending", date: new Date().toISOString() };
+    const newSub = {
+      id: Date.now().toString(),
+      author: user.username,
+      title: shareTitle,
+      link: shareXLink || shareYoutubeLink || shareOtherLink,
+      xLink: shareXLink,
+      youtubeLink: shareYoutubeLink,
+      otherLink: shareOtherLink,
+      desc: shareDesc,
+      category: shareCategory,
+      status: "Pending",
+      date: new Date().toISOString()
+    };
     localStorage.setItem("labvex_submissions", JSON.stringify([newSub, ...existing]));
-    toast.success("Content submitted for admin review.");
-    setShareTitle(""); setShareLink(""); setShareDesc("");
+    toast.success("Content submitted for admin review!");
+    setShareTitle(""); setShareXLink(""); setShareYoutubeLink(""); setShareOtherLink(""); setShareDesc("");
   };
 
   return (
@@ -200,24 +220,62 @@ export default function IdentityTerminal({ params }: { params: { username: strin
 
         {/* Content Submission Form */}
         {isOwnProfile && (
-          <div className="card" style={{ padding: 32, marginTop: 24 }}>
-            <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)", marginBottom: 8 }}>Share Your Work</h3>
-            <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 24 }}>Submit your published papers, validated datasets, or peer reviews to earn reputation.</p>
-            
+          <div className="card" style={{ padding: 32, marginTop: 24, border: "1px solid rgba(92,203,95,0.2)", background: "linear-gradient(135deg,rgba(92,203,95,0.02),rgba(255,255,255,1))" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(92,203,95,0.1)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green-3)" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 600, color: "var(--ink)" }}>Share Your Content</h3>
+            </div>
+            <p style={{ fontSize: 13.5, color: "var(--muted)", marginBottom: 24 }}>Submit your X posts, YouTube videos, papers, or other research. Admins will review and award reputation manually.</p>
+
             <div style={{ display: "grid", gap: 16 }}>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Title <span style={{ color: "var(--green-3)" }}>*</span></label>
-                <input value={shareTitle} onChange={e => setShareTitle(e.target.value)} placeholder="e.g. Epigenetic reprogramming review" style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }} />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Title <span style={{ color: "var(--green-3)" }}>*</span></label>
+                  <input value={shareTitle} onChange={e => setShareTitle(e.target.value)} placeholder="e.g. Longevity research thread" style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }} />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Category</label>
+                  <select value={shareCategory} onChange={e => setShareCategory(e.target.value)} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }}>
+                    {["Research","Peer Review","Validation","Educational","Community"].map(c => <option key={c}>{c}</option>)}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Link / DOI <span style={{ color: "var(--green-3)" }}>*</span></label>
-                <input value={shareLink} onChange={e => setShareLink(e.target.value)} placeholder="https://..." style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none" }} />
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 12 }}>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4l11.733 16h4.267l-11.733 -16z"/><path d="M4 20l6.768 -6.768m2.46 -2.46l6.772 -6.772"/></svg>
+                      X Post Link
+                    </span>
+                  </label>
+                  <input value={shareXLink} onChange={e => setShareXLink(e.target.value)} placeholder="https://x.com/..." style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 13, outline: "none" }} />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>
+                    <span style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17,2 12,7 7,2"/></svg>
+                      YouTube Link
+                    </span>
+                  </label>
+                  <input value={shareYoutubeLink} onChange={e => setShareYoutubeLink(e.target.value)} placeholder="https://youtube.com/..." style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 13, outline: "none" }} />
+                </div>
+                <div>
+                  <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Other Link (DOI, paper)</label>
+                  <input value={shareOtherLink} onChange={e => setShareOtherLink(e.target.value)} placeholder="https://..." style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 13, outline: "none" }} />
+                </div>
               </div>
+
               <div>
-                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Methodology / Notes</label>
-                <textarea value={shareDesc} onChange={e => setShareDesc(e.target.value)} placeholder="Brief summary of your methodology or findings..." rows={3} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none", resize: "none" }} />
+                <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Description / Notes</label>
+                <textarea value={shareDesc} onChange={e => setShareDesc(e.target.value)} placeholder="Briefly explain your content and why it should earn reputation..." rows={3} style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, outline: "none", resize: "none" }} />
               </div>
-              <button onClick={handleShare} className="btn btn-dark" style={{ width: "fit-content", padding: "0.6rem 1.5rem" }}>Submit for Verification</button>
+
+              <button onClick={handleShare} className="btn btn-dark" style={{ width: "fit-content", padding: "0.6rem 1.8rem", background: "var(--green-3)", borderColor: "var(--green-3)" }}>
+                Submit for Review
+              </button>
             </div>
           </div>
         )}
@@ -226,3 +284,4 @@ export default function IdentityTerminal({ params }: { params: { username: strin
     </div>
   );
 }
+
