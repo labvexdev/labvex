@@ -31,13 +31,11 @@ function Nav() {
           ))}
         </nav>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          {/* Devnet badge */}
           <div style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 10px", borderRadius:99, background:"rgba(139,92,246,0.08)", border:"1px solid rgba(139,92,246,0.25)" }}>
             <div style={{ width:6, height:6, borderRadius:"50%", background:"#8b5cf6" }} />
             <span style={{ fontSize:11, fontWeight:600, color:"#7c3aed", letterSpacing:"0.04em" }}>DEVNET</span>
           </div>
-          <Link href="/onboarding" className="btn btn-outline" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Log in</Link>
-          <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.25rem" }}>Launch App <ArrowRight size={14}/></Link>
+          <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.5rem" }}>Sign In / Sign Up <ArrowRight size={14}/></Link>
         </div>
       </div>
     </header>

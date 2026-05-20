@@ -205,6 +205,12 @@ export default function OnboardingPage() {
                     style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, color: "var(--ink)", outline: "none" }}
                   />
                   <p className="font-mono" style={{ fontSize: 11, color: "var(--subtle)", marginTop: 6 }}>labvex.io/profile/{username || "your_username"}</p>
+                  {/* Admin hint */}
+                  {username === "labvex_admin" && (
+                    <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)", fontSize: 12, color: "#dc2626", fontWeight: 600 }}>
+                      🛡 Admin mode detected. You will have access to the Admin Console after sign-up.
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Display Name</label>
