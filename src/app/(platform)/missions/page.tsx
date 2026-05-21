@@ -22,7 +22,8 @@ export default async function MissionsPage() {
       id: m.id,
       title: m.title,
       desc: m.description,
-      reward: m.reward,
+      reward: m.repReward,
+      usdt: m.usdtReward > 0 ? m.usdtReward : undefined,
       diff: "Medium", // Default since it's not in DB
       category: "Research", // Default
       time: "~2h", // Default
