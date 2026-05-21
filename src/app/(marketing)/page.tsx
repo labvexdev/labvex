@@ -31,10 +31,7 @@ function Nav() {
           ))}
         </nav>
         <div style={{ display:"flex", gap:10, alignItems:"center" }}>
-          <div style={{ display:"flex", alignItems:"center", gap:5, padding:"4px 10px", borderRadius:99, background:"rgba(139,92,246,0.08)", border:"1px solid rgba(139,92,246,0.25)" }}>
-            <div style={{ width:6, height:6, borderRadius:"50%", background:"#8b5cf6" }} />
-            <span style={{ fontSize:11, fontWeight:600, color:"#7c3aed", letterSpacing:"0.04em" }}>DEVNET</span>
-          </div>
+
           <Link href="/onboarding" className="btn btn-dark" style={{ fontSize:14, padding:"0.5rem 1.5rem" }}>Sign In / Sign Up <ArrowRight size={14}/></Link>
         </div>
       </div>
@@ -315,11 +312,7 @@ function Footer() {
               </div>
               <span style={{ fontFamily:"'Space Grotesk',sans-serif",fontWeight:700,fontSize:16,letterSpacing:"-0.02em",color:"var(--ink)" }}>LABVEX</span>
             </Link>
-            {/* Devnet badge in footer */}
-            <div style={{ display:"flex", alignItems:"center", gap:5, padding:"3px 8px", borderRadius:99, background:"rgba(139,92,246,0.08)", border:"1px solid rgba(139,92,246,0.2)" }}>
-              <div style={{ width:5,height:5,borderRadius:"50%",background:"#8b5cf6" }} />
-              <span style={{ fontSize:10, fontWeight:600, color:"#7c3aed", letterSpacing:"0.04em" }}>SOLANA DEVNET</span>
-            </div>
+
           </div>
           <div style={{ display:"flex", gap:24, flexWrap:"wrap" }}>
             {[["Feed","/feed"],["VEXY AI","/vexy"],["Missions","/missions"],["Reputation","/reputation"],["Forum","/forum"],["About","/about"]].map(([l,h])=>(

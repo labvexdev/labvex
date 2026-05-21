@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FlaskConical, Wallet, User, Tag, CheckCircle, ArrowRight, ChevronRight, Zap } from "lucide-react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
-import { connectSolanaWallet, connectBackpackWallet } from "@/lib/wallet";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { signIn } from "next-auth/react";
+import bs58 from "bs58";
 
 const INTERESTS = ["AI", "Biotech", "Longevity", "Neuroscience", "Genetics", "DeSci"];
 
@@ -29,52 +31,67 @@ export default function OnboardingPage() {
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [walletConnected, setWalletConnected] = useState(false);
   const router = useRouter();
+
+  const { select, wallets, publicKey, signMessage, disconnect } = useWallet();
 
   const toggleInterest = (i: string) =>
     setSelectedInterests((prev) =>
       prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i]
     );
 
-  const connectWallet = async () => {
-    await new Promise((r) => setTimeout(r, 900));
-    const mockAddress = "7xKX" + Math.random().toString(36).substring(2, 10).toUpperCase() + "..." + Math.random().toString(36).substring(2, 6).toUpperCase();
-    localStorage.setItem("labvex_wallet", mockAddress);
-    setWalletConnected(true);
-    toast.success("Wallet connected: " + mockAddress.substring(0, 8) + "...");
-    setTimeout(() => setStep(2), 600);
-  };
+  // Watch for wallet connection to trigger signature
+  useEffect(() => {
+    const handleSign = async () => {
+      if (publicKey && signMessage && step === 1) {
+        try {
+          const message = `Sign this message to prove you own this wallet for LABVEX.\n\nNonce: ${Math.floor(Math.random() * 1000000)}`;
+          const messageBytes = new TextEncoder().encode(message);
+          
+          toast.loading("Please sign the message in your wallet...", { id: "signMsg" });
+          const signatureBytes = await signMessage(messageBytes);
+          toast.dismiss("signMsg");
+          
+          const signature = bs58.encode(signatureBytes);
+          const pubKeyStr = publicKey.toBase58();
+
+          toast.loading("Verifying...", { id: "verify" });
+          const res = await signIn("solana", {
+            message,
+            signature,
+            publicKey: pubKeyStr,
+            redirect: false,
+          });
+          toast.dismiss("verify");
+
+          if (res?.error) {
+            toast.error("Signature verification failed");
+            await disconnect();
+          } else {
+            toast.success("Wallet verified!");
+            setStep(2);
+          }
+        } catch (err: any) {
+          toast.dismiss("signMsg");
+          toast.error(err.message || "Failed to sign message");
+          await disconnect();
+        }
+      }
+    };
+    handleSign();
+  }, [publicKey, signMessage, step, disconnect]);
 
   const connectGoogle = async () => {
-    // Mock Google Auth
-    await new Promise((r) => setTimeout(r, 1200));
-    const mockGoogleId = "google:" + Math.random().toString(36).substring(2, 12);
-    localStorage.setItem("labvex_wallet", mockGoogleId);
-    setWalletConnected(true);
-    toast.success("Authenticated with Google");
-    setTimeout(() => setStep(2), 600);
+    await signIn("google", { callbackUrl: "/feed" });
   };
 
   const handleFinish = () => {
     if (selectedInterests.length === 0) { toast.error("Select at least one interest"); return; }
     
-    // Save profile data
-    const userData = {
-      username: username || "anonymous",
-      display_name: displayName || "New Researcher",
-      bio: bio || "Science enthusiast and LABVEX member.",
-      interests: selectedInterests,
-      wallet_address: localStorage.getItem("labvex_wallet") || "Not Connected",
-      reputation_score: 100, // Starting score
-      badges: ["Early Scientist"],
-      created_at: new Date().toISOString().split('T')[0],
-      stats: { posts: 0, comments: 0, upvotes_received: 0, missions_completed: 0 }
-    };
-    localStorage.setItem("labvex_user", JSON.stringify(userData));
-
+    // In a real app, you'd send these details to an API to update the User record.
+    // We already created the user on signIn, so here we just advance.
     setStep(4);
-    setTimeout(() => router.push(`/profile/${userData.username}`), 2000);
+    setTimeout(() => router.push(`/feed`), 2000);
   };
 
   return (
@@ -122,38 +139,28 @@ export default function OnboardingPage() {
               <div style={{ width: 64, height: 64, borderRadius: 20, background: "rgba(92,203,95,0.08)", border: "1px solid rgba(92,203,95,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 24px" }}>
                 <Wallet size={28} color="var(--green-3)" />
               </div>
-              <h2 className="t-h3" style={{ marginBottom: 12, fontSize: 22 }}>Connect Your Wallet</h2>
+              <h2 className="t-h3" style={{ marginBottom: 12, fontSize: 22 }}>Connect Your Identity</h2>
               <p className="t-body" style={{ marginBottom: 32, fontSize: 14.5 }}>
-                Your Solana wallet is your scientific identity on LABVEX. Connect Phantom or Backpack to get started.
+                Your Solana wallet or Google account acts as your scientific identity on LABVEX. 
               </p>
               
               <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-                {[
-                  { label: "Phantom Wallet", sub: "Most popular Solana wallet", color: "#ab9ff2", connect: connectSolanaWallet },
-                  { label: "Backpack", sub: "Multi-chain wallet by Coral", color: "#e15d3d", connect: connectBackpackWallet },
-                ].map((w) => (
+                {wallets.slice(0, 2).map((w) => (
                   <button
-                    key={w.label}
-                    onClick={async () => {
-                      const addr = await w.connect();
-                      if (addr) {
-                        setWalletConnected(true);
-                        toast.success("Identity Verified: " + addr.substring(0, 8) + "...");
-                        setTimeout(() => setStep(2), 800);
-                      }
-                    }}
+                    key={w.adapter.name}
+                    onClick={() => select(w.adapter.name)}
                     style={{ 
-                      width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--surface)", transition: "all 0.2s", textAlign: "left" 
+                      width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--surface)", transition: "all 0.2s", textAlign: "left", cursor: "pointer"
                     }}
                     onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--green)"; (e.currentTarget as HTMLElement).style.background = "var(--surface-2)"; }}
                     onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "var(--border)"; (e.currentTarget as HTMLElement).style.background = "var(--surface)"; }}
                   >
-                    <div style={{ width: 38, height: 38, borderRadius: 10, background: `${w.color}15`, border: `1px solid ${w.color}30`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                      <Wallet size={16} style={{ color: w.color }} />
+                    <div style={{ width: 38, height: 38, borderRadius: 10, background: `rgba(255,255,255,0.05)`, border: `1px solid rgba(255,255,255,0.1)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <img src={w.adapter.icon} alt={w.adapter.name} style={{ width: 20, height: 20 }} />
                     </div>
                     <div style={{ flex: 1 }}>
-                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{w.label}</p>
-                      <p style={{ fontSize: 12, color: "var(--subtle)" }}>{w.sub}</p>
+                      <p style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>{w.adapter.name}</p>
+                      <p style={{ fontSize: 12, color: "var(--subtle)" }}>Sign-in with Solana</p>
                     </div>
                     <ChevronRight size={14} style={{ color: "var(--subtle)" }} />
                   </button>
@@ -183,16 +190,13 @@ export default function OnboardingPage() {
                 <span style={{ fontSize: 14, fontWeight: 600, color: "var(--ink)" }}>Continue with Google</span>
               </button>
               
-              <button onClick={() => setStep(2)} style={{ background: "none", border: "none", width: "100%", display: "flex", justifyContent: "center", marginTop: 24, fontSize: 13.5, color: "var(--muted)", fontWeight: 500, cursor: "pointer" }}>
-                Continue as guest
-              </button>
             </motion.div>
           )}
 
           {/* Step 2 — Create profile */}
           {step === 2 && (
             <motion.div key="step2" {...fade()} className="card" style={{ padding: 40 }}>
-              <h2 className="t-h3" style={{ marginBottom: 8, fontSize: 22 }}>Create Your Profile</h2>
+              <h2 className="t-h3" style={{ marginBottom: 8, fontSize: 22 }}>Setup Optional Info</h2>
               <p className="t-body" style={{ marginBottom: 32, fontSize: 14.5 }}>Set up your scientific identity on LABVEX.</p>
               
               <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -204,13 +208,6 @@ export default function OnboardingPage() {
                     onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/\s/g, "_"))} 
                     style={{ width: "100%", padding: "12px 14px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--surface-2)", fontSize: 14, color: "var(--ink)", outline: "none" }}
                   />
-                  <p className="font-mono" style={{ fontSize: 11, color: "var(--subtle)", marginTop: 6 }}>labvex.io/profile/{username || "your_username"}</p>
-                  {/* Admin hint */}
-                  {username === "labvex_admin" && (
-                    <div style={{ marginTop: 8, padding: "8px 12px", borderRadius: 8, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)", fontSize: 12, color: "#dc2626", fontWeight: 600 }}>
-                      🛡 Admin mode detected. You will have access to the Admin Console after sign-up.
-                    </div>
-                  )}
                 </div>
                 <div>
                   <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: "var(--muted)", marginBottom: 8 }}>Display Name</label>
@@ -234,7 +231,7 @@ export default function OnboardingPage() {
               </div>
               
               <button
-                onClick={() => { if (!username.trim()) { toast.error("Username is required"); return; } setStep(3); }}
+                onClick={() => { setStep(3); }}
                 className="btn btn-dark" style={{ width: "100%", justifyContent: "center", marginTop: 32, fontSize: 15, padding: "12px" }}
               >
                 Continue <ArrowRight size={15} />
@@ -303,7 +300,7 @@ export default function OnboardingPage() {
       {/* Footer Disclaimer */}
       <div style={{ position: "relative", zIndex: 10, marginTop: 48, textAlign: "center", maxWidth: 400 }}>
         <p style={{ fontSize: 11, color: "var(--subtle)", lineHeight: 1.6 }}>
-          <strong>Notice:</strong> By connecting your wallet, you agree to the LABVEX Informed Consent Protocol and Terms of Service. Science is a collaborative pursuit.
+          <strong>Notice:</strong> By connecting your wallet or Google account, you agree to the LABVEX Informed Consent Protocol and Terms of Service. Science is a collaborative pursuit.
         </p>
       </div>
     </div>

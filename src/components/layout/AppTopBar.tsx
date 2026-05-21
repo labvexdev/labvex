@@ -33,11 +33,7 @@ export function AppTopBar() {
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        {/* Devnet badge */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", borderRadius: 99, background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)" }}>
-          <div style={{ width: 6, height: 6, borderRadius: "50%", background: "#8b5cf6" }} />
-          <span style={{ fontSize: 11, fontWeight: 600, color: "#7c3aed", letterSpacing: "0.04em" }}>DEVNET</span>
-        </div>
+
 
         <button
           onClick={handleConnect}

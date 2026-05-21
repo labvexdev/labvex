@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id             String       @id @default(uuid())
+  walletAddress  String?      @unique
+  googleEmail    String?      @unique
+  username       String       @unique
+  displayName    String?
+  reputation     Int          @default(0)
+  role           String       @default("MEMBER") // or "ADMIN"
+  createdAt      DateTime     @default(now())
+  
+  posts          Post[]
+  submissions    Submission[]
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Mission {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  repReward   Int
+  usdtReward  Int      @default(0)
+  createdAt   DateTime @default(now())
+}
+
+model Submission {
+  id          String   @id @default(uuid())
+  title       String
+  link        String
+  category    String
+  status      String   @default("Pending") // Pending, Approved, Rejected
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+}
