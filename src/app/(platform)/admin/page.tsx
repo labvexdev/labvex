@@ -9,11 +9,12 @@ export const revalidate = 0;
 export default async function AdminDashboard() {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
+    const user = session?.user as { id?: string } | undefined;
+    if (!user?.id) {
       redirect("/onboarding");
     }
 
-    const me = await prisma.user.findUnique({ where: { id: session.user.id } });
+    const me = await prisma.user.findUnique({ where: { id: user.id } });
     
     // Hardcoded admin check for prototyping
     if (!me || (me.username !== "labvex_admin" && me.username !== "genetics_mapper")) {
