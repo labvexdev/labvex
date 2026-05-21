@@ -26,7 +26,7 @@ export default async function AdminDashboard() {
       include: { author: true }
     });
 
-    const submissions: SubmissionData[] = dbSubmissions.map(s => ({
+    const submissions: SubmissionData[] = dbSubmissions.map((s: any) => ({
       id: s.id,
       author: s.author.username,
       title: s.title,
