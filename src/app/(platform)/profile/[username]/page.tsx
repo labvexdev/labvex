@@ -25,14 +25,15 @@ export default async function ProfilePage({ params }: { params: { username: stri
     let targetUsername = params.username;
 
     if (targetUsername === "me") {
-      if (!session?.user?.id) {
+      const user = session?.user as { id?: string } | undefined;
+      if (!user?.id) {
         return (
           <div style={{ padding: 40, textAlign: "center" }}>
             <h2>You must be logged in to view your profile.</h2>
           </div>
         );
       }
-      const me = await prisma.user.findUnique({ where: { id: session.user.id } });
+      const me = await prisma.user.findUnique({ where: { id: user.id } });
       if (!me) {
         return <div style={{ padding: 40, textAlign: "center" }}>User not found in database.</div>;
       }
@@ -51,13 +52,14 @@ export default async function ProfilePage({ params }: { params: { username: stri
       return <div style={{ padding: 40, textAlign: "center" }}>User not found</div>;
     }
 
-    const isOwnProfile = session?.user?.id === dbUser.id;
+    const userObj = session?.user as { id?: string } | undefined;
+    const isOwnProfile = userObj?.id === dbUser.id;
 
     const userData: UserProfileData = {
       id: dbUser.id,
       username: dbUser.username,
       display_name: dbUser.displayName || dbUser.username,
-      bio: dbUser.bio || "Science enthusiast and LABVEX member.",
+      bio: "Science enthusiast and LABVEX member.",
       wallet_address: dbUser.walletAddress || "Not Connected",
       reputation_score: dbUser.reputation,
       badges: ["Early Scientist"],
